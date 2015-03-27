@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
+
 -- | Handling of archives. Writing, reading, etc.
 
 module Sig.Archive where
