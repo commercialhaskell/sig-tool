@@ -5,12 +5,16 @@
 -- | Types for the signing process.
 
 module Sig.Types
-  (Mapping(..)
+  (Archive(..)
+  ,Signature(..)
+  ,Mapping(..)
   ,Signer(..)
   ,FingerprintSample(..))
   where
 
 import           Data.Aeson
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString as SB
 import           Data.Char
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -19,14 +23,31 @@ import qualified Data.Set as S
 import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import           Distribution.Compat.ReadP
-import           Distribution.Package (PackageName)
-import           Distribution.ParseUtils
+import           Distribution.Package
+import           Sig.Cabal
 import           Text.Email.Validate
 
--- | A mapping from
+-- | A signature archive.
+data Archive =
+  Archive {archiveMappings :: ![Mapping]
+          ,archiveSignatures :: !(Map PackageIdentifier (Set Signature))}
+  deriving (Show)
+
+-- | A signature.
+newtype Signature = Signature ByteString
+  deriving (Ord,Eq)
+
+instance Show Signature where
+  show (Signature s) =
+    "Signature " ++
+    (if SB.length s > 140
+        then show (SB.take 140 s) ++
+             "..."
+        else show (SB.take 140 s))
+
+-- | A mapping from signers to packages.
 data Mapping =
-  Mapping {mappingSigners :: Map Signer (Set PackageName)}
+  Mapping {mappingSigners :: !(Map Signer (Set PackageName))}
   deriving (Show)
 
 instance FromJSON Mapping where
@@ -71,9 +92,10 @@ instance FromJSON FingerprintSample where
 instance FromJSON (Aeson PackageName) where
   parseJSON j =
     do s <- parseJSON j
-       case readP_to_S parsePackageNameQ s of
-         [(name,"")] -> return (Aeson name)
-         _ -> fail ("Invalid package name: " ++ s)
+       case parsePackageName s of
+         Just name -> return (Aeson name)
+         Nothing ->
+           fail ("Invalid package name: " ++ s)
 
 instance FromJSON (Aeson EmailAddress) where
   parseJSON j =

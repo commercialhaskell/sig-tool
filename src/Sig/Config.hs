@@ -1,0 +1,3 @@
+-- |
+
+module Sig.Config where
