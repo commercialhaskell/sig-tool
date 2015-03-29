@@ -28,10 +28,10 @@ readArchive dir =
        filterDirectory (dir </> mappingsDir)
                        (isSuffixOf ".yaml")
      mappings <-
-       mapM readMapping mappingFilepaths
+       mapM (\fp -> fmap (fp,) (readMapping fp)) mappingFilepaths
      signatures <-
        readSignatures (dir </> signaturesDir)
-     return (Archive {archiveMappings = mappings
+     return (Archive {archiveMappings = M.fromList mappings
                      ,archiveSignatures = signatures})
 
 -- | Read all signatures from the directory.
