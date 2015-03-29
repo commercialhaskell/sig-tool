@@ -29,7 +29,7 @@ import           Text.Email.Validate
 
 -- | A signature archive.
 data Archive =
-  Archive {archiveMappings :: !(Map FilePath Mapping)
+  Archive {archiveMappings :: !(Map Text Mapping)
           ,archiveSignatures :: !(Map PackageIdentifier (Set Signature))}
   deriving (Show)
 

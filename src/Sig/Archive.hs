@@ -13,6 +13,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as S
+import qualified Data.Text as T
 import           Distribution.Package
 import           Sig.Cabal
 import           Sig.Defaults
@@ -25,10 +26,10 @@ import           System.FilePath
 readArchive :: FilePath -> IO Archive
 readArchive dir =
   do mappingFilepaths <-
-       filterDirectory (dir </> mappingsDir)
-                       (isSuffixOf ".yaml")
+       parseDirectory (dir </> mappingsDir)
+                      (T.stripSuffix ".yaml" . T.pack)
      mappings <-
-       mapM (\fp -> fmap (fp,) (readMapping fp)) mappingFilepaths
+       mapM (\(fp,name) -> fmap (name,) (readMapping fp)) mappingFilepaths
      signatures <-
        readSignatures (dir </> signaturesDir)
      return (Archive {archiveMappings = M.fromList mappings
