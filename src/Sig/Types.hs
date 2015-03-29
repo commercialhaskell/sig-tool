@@ -78,7 +78,7 @@ newtype Aeson a =
 
 -- | The last few digits of a GPG fingerprint.
 newtype FingerprintSample =
-  FingerprintSample Text
+  FingerprintSample {fingerprintSample :: Text}
   deriving (Eq,Ord,Show)
 
 instance FromJSON FingerprintSample where
