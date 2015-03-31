@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 {-|
-Module      : Sig.CLI.Sign
+Module      : Sig.Update
 Description : Haskell Package Signing Tool - CLI
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
@@ -11,12 +11,12 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.CLI.Sign where
+module Sig.Update where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
 
-sign :: forall m a.
-        MonadIO m
-     => FilePath -> m a
-sign _path = error "not implemented"
+update :: forall m a.
+          MonadIO m
+       => m a
+update = error "not implemented"

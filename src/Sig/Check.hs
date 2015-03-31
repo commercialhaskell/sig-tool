@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 {-|
-Module      : Sig.CLI.Trust
+Module      : Sig.Check
 Description : Haskell Package Signing Tool - CLI
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
@@ -11,12 +11,12 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.CLI.Trust where
+module Sig.Check where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
 
-trust :: forall m a.
-        MonadIO m
-     => String -> m a
-trust _name = error "not implemented"
+check :: forall m a.
+         MonadIO m
+      => String -> m a
+check _package = error "not implemented"

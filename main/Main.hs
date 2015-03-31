@@ -36,13 +36,13 @@ import Options.Applicative
       fullDesc,
       command,
       argument )
-import Sig.CLI.Check ( check )
-import Sig.CLI.Init ( initialize )
-import Sig.CLI.Install ( install )
-import Sig.CLI.List ( list )
-import Sig.CLI.Sign ( sign )
-import Sig.CLI.Trust ( trust )
-import Sig.CLI.Update ( update )
+import Sig.Check ( check )
+import Sig.Init ( initialize )
+import Sig.Install ( install )
+import Sig.List ( list )
+import Sig.Sign ( sign )
+import Sig.Trust ( trust )
+import Sig.Update ( update )
 
 -- | Main entry point.
 main :: IO ()

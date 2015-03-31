@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 {-|
-Module      : Sig.CLI.Init
+Module      : Sig.Init
 Description : Haskell Package Signing Tool - CLI
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
@@ -11,7 +11,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.CLI.Init where
+module Sig.Init where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO(..) )
