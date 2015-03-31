@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.Trust
@@ -18,18 +14,11 @@ Portability : POSIX
 module Sig.CLI.Trust where
 
 import BasePrelude
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
+import Sig.CLI.Types ( Options(Trust) )
 
-data Trust = Trust
-
-instance Command Trust where
-  data CmdOpts Trust = TrustCmd String
-  cmd Trust =
-    command "trust"
-          (info (helper <*>
-                 (TrustCliOpts <$>
-                  argument str (metavar "NAME")))
-                (fullDesc <>
-                 progDesc "Trust Mappings"))
-  run (TrustCmd _name) = error "not implemented"
+trust :: forall m a.
+        MonadIO m
+     => Options -> m a
+trust (Trust _name) = error "not implemented"
+trust _ = error "bad pattern match"

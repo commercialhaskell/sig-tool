@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.Init
@@ -18,26 +14,19 @@ Portability : POSIX
 module Sig.CLI.Init where
 
 import BasePrelude
-import Control.Monad.IO.Class ( liftIO )
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO(..) )
+import Sig.CLI.Types ( Options(Initialize) )
 import System.Directory
-import System.FilePath
+    ( getHomeDirectory, createDirectoryIfMissing )
+import System.FilePath ( (</>) )
 
-data Init = Init
-
-instance Command Init where
-  data CmdOpts Init = InitCmd
-  cmd Init =
-    command "init"
-            (info (helper <*>
-                   pure InitCliOpts)
-                  (fullDesc <>
-                   progDesc "Initialize"))
-  run InitCmd =
-    liftIO (do homeDir <- getHomeDirectory
-               createDirectoryIfMissing True
-                                        (homeDir </> ".sig")
-               initConfigFile)
-    where initConfigFile =
-            error "not implemented"
+initialize :: forall m a.
+              MonadIO m
+           => Options -> m a
+initialize Initialize =
+  liftIO (do homeDir <- getHomeDirectory
+             createDirectoryIfMissing True
+                                      (homeDir </> ".sig")
+             initConfigFile)
+  where initConfigFile = error "not implemented"
+initialize _ = error "bad pattern match"

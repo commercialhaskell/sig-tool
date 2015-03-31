@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.Install
@@ -18,19 +14,11 @@ Portability : POSIX
 module Sig.CLI.Install where
 
 import BasePrelude
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
+import Sig.CLI.Types ( Options(Install) )
 
-data Install = Install
-
-instance Command Install where
-  data CmdOpts Install = InstallCmd String
-  cmd Install =
-    command "install"
-            (info (helper <*>
-                   (InstallCliOpts <$>
-                    argument str (metavar "PACKAGE")))
-                  (fullDesc <>
-                   progDesc "Install Package"))
-  run (InstallCmd package) =
-    error "not implemented"
+install :: forall m a.
+           MonadIO m
+        => Options -> m a
+install (Install _package) = error "not implemented"
+install _ = error "bad pattern match"

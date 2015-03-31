@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.List
@@ -18,17 +14,11 @@ Portability : POSIX
 module Sig.CLI.List where
 
 import BasePrelude
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
+import Sig.CLI.Types ( Options(List) )
 
-data List = List
-
-instance Command List where
-  data CmdOpts List = ListCmd
-  cmd List =
-    command "mappings"
-            (info (helper <*>
-                   pure ListCliOpts)
-                  (fullDesc <>
-                   progDesc "List Mappings"))
-  run ListCmd = error "not implemented"
+list :: forall m a.
+        MonadIO m
+     => Options -> m a
+list List = error "not implemented"
+list _ = error "bad pattern match"

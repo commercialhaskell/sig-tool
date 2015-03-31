@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.Check
@@ -18,19 +14,11 @@ Portability : POSIX
 module Sig.CLI.Check where
 
 import BasePrelude
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
+import Sig.CLI.Types ( Options(Check) )
 
-data Check = Check
-
-instance Command Check where
-  data CmdOpts Check = CheckCmd String
-  cmd Check =
-    command "check"
-            (info (helper <*>
-                   (CheckCliOpts <$>
-                    argument str (metavar "PACKAGE")))
-                  (fullDesc <>
-                   progDesc "Check Package"))
-  run (CheckCmd package) =
-    error "not implemented"
+check :: forall m a.
+         MonadIO m
+      => Options -> m a
+check (Check _package) = error "not implemented"
+check _ = error "bad pattern match"

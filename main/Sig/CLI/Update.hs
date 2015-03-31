@@ -1,9 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Sig.CLI.Update
@@ -18,17 +14,11 @@ Portability : POSIX
 module Sig.CLI.Update where
 
 import BasePrelude
-import Options.Applicative
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
+import Sig.CLI.Types ( Options(Update) )
 
-data Update = Update
-
-instance Command Update where
-  data CmdOpts Update = UpdateCmd
-  cmd Update =
-    command "update"
-            (info (helper <*>
-                   pure UpdateCliOpts)
-                  (fullDesc <>
-                   progDesc "Update the Archive"))
-  run UpdateCmd = error "not implemented"
+update :: forall m a.
+          MonadIO m
+       => Options -> m a
+update Update = error "not implemented"
+update _ = error "bad pattern match"
