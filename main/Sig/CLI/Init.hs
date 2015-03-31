@@ -15,18 +15,16 @@ module Sig.CLI.Init where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO(..) )
-import Sig.CLI.Types ( Options(Initialize) )
 import System.Directory
     ( getHomeDirectory, createDirectoryIfMissing )
 import System.FilePath ( (</>) )
 
 initialize :: forall m a.
               MonadIO m
-           => Options -> m a
-initialize Initialize =
+           => m a
+initialize =
   liftIO (do homeDir <- getHomeDirectory
              createDirectoryIfMissing True
                                       (homeDir </> ".sig")
              initConfigFile)
   where initConfigFile = error "not implemented"
-initialize _ = error "bad pattern match"

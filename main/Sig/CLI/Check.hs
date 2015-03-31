@@ -15,10 +15,8 @@ module Sig.CLI.Check where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
-import Sig.CLI.Types ( Options(Check) )
 
 check :: forall m a.
          MonadIO m
-      => Options -> m a
-check (Check _package) = error "not implemented"
-check _ = error "bad pattern match"
+      => String -> m a
+check _package = error "not implemented"

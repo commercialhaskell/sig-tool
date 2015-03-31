@@ -42,8 +42,6 @@ import Sig.CLI.Install ( install )
 import Sig.CLI.List ( list )
 import Sig.CLI.Sign ( sign )
 import Sig.CLI.Trust ( trust )
-import Sig.CLI.Types
-    ( Options(Check, Initialize, Install, List, Sign, Trust, Update) )
 import Sig.CLI.Update ( update )
 
 -- | Main entry point.
@@ -54,47 +52,37 @@ main =
                  subparser (command "check"
                                     (info (helper <*>
                                            (check <$>
-                                            (Check <$>
-                                             argument str (metavar "PACKAGE"))))
+                                            argument str (metavar "PACKAGE")))
                                           (fullDesc <>
                                            progDesc "Check Package")) <>
                             command "init"
-                                    (info (helper <*>
-                                           (initialize <$>
-                                            pure Initialize))
+                                    (info (helper <*> pure initialize)
                                           (fullDesc <>
                                            progDesc "Initialize")) <>
                             command "install"
                                     (info (helper <*>
                                            (install <$>
-                                            (Install <$>
-                                             argument str (metavar "PACKAGE"))))
+                                            argument str (metavar "PACKAGE")))
                                           (fullDesc <>
                                            progDesc "Install Package")) <>
                             command "mappings"
-                                    (info (helper <*>
-                                           (list <$>
-                                            pure List))
+                                    (info (helper <*> pure list)
                                           (fullDesc <>
                                            progDesc "List Mappings")) <>
                             command "sign"
                                     (info (helper <*>
                                            (sign <$>
-                                            (Sign <$>
-                                             argument str (metavar "PATH"))))
+                                            argument str (metavar "PATH")))
                                           (fullDesc <>
                                            progDesc "Sign Package(s)")) <>
                             command "trust"
                                     (info (helper <*>
                                            (trust <$>
-                                            (Trust <$>
-                                             argument str (metavar "NAME"))))
+                                            argument str (metavar "NAME")))
                                           (fullDesc <>
                                            progDesc "Trust Mappings")) <>
                             command "update"
-                                    (info (helper <*>
-                                           (update <$>
-                                            pure Update))
+                                    (info (helper <*> pure update)
                                           (fullDesc <>
                                            progDesc "Update the Archive"))))
                 (fullDesc <>

@@ -15,10 +15,8 @@ module Sig.CLI.Trust where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
-import Sig.CLI.Types ( Options(Trust) )
 
 trust :: forall m a.
         MonadIO m
-     => Options -> m a
-trust (Trust _name) = error "not implemented"
-trust _ = error "bad pattern match"
+     => String -> m a
+trust _name = error "not implemented"

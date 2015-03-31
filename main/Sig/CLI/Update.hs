@@ -15,10 +15,8 @@ module Sig.CLI.Update where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
-import Sig.CLI.Types ( Options(Update) )
 
 update :: forall m a.
           MonadIO m
-       => Options -> m a
-update Update = error "not implemented"
-update _ = error "bad pattern match"
+       => m a
+update = error "not implemented"

@@ -15,10 +15,8 @@ module Sig.CLI.List where
 
 import BasePrelude
 import Control.Monad.IO.Class ( MonadIO )
-import Sig.CLI.Types ( Options(List) )
 
 list :: forall m a.
         MonadIO m
-     => Options -> m a
-list List = error "not implemented"
-list _ = error "bad pattern match"
+     => m a
+list = error "not implemented"

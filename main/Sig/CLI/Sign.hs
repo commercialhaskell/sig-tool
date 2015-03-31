@@ -14,11 +14,9 @@ Portability : POSIX
 module Sig.CLI.Sign where
 
 import BasePrelude
-import Control.Monad.IO.Class
-import Sig.CLI.Types
+import Control.Monad.IO.Class ( MonadIO )
 
 sign :: forall m a.
         MonadIO m
-     => Options -> m a
-sign (Sign _path) = error "not implemented"
-sign _ = error "bad pattern match"
+     => FilePath -> m a
+sign _path = error "not implemented"
