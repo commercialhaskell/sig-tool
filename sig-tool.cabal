@@ -42,5 +42,11 @@ executable sig
   main-is:           Main.hs
   build-depends:     base >= 4 && < 5
                    , base-prelude
+                   , cabal-file-th
+                   , directory
+                   , filepath
                    , optparse-applicative
                    , sig-tool
+                   , template-haskell
+                   , time
+                   , transformers
