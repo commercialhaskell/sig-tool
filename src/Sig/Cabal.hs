@@ -12,7 +12,7 @@ import qualified Text.ParserCombinators.ReadP as ReadP
 -- | Parse a package name.
 parsePackageName :: String -> Maybe PackageName
 parsePackageName s =
-  case Compat.readP_to_S parsePackageNameQ s of
+  case reverse (Compat.readP_to_S parsePackageNameQ s) of
     ((name,""):_) -> Just name
     _ -> Nothing
 
