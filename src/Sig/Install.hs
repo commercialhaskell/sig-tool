@@ -1,9 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE RankNTypes #-}
 
 {-|
 Module      : Sig.Install
-Description : Haskell Package Signing Tool - CLI
+Description : Haskell Package Signing Tool: Installing with Cabal
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
 Maintainer  : Tim Dysinger <tim@fpcomplete.com>
@@ -14,9 +13,12 @@ Portability : POSIX
 module Sig.Install where
 
 import BasePrelude
-import Control.Monad.IO.Class ( MonadIO )
+import Sig.Cabal ( cabalInstall )
+import Sig.Check ( check )
+import Sig.Doc ( putInstallHeader )
 
-install :: forall m a.
-           MonadIO m
-        => String -> m a
-install _package = error "not implemented"
+install :: [String] -> String -> IO ()
+install extraArgs pkg =
+  do check extraArgs pkg
+     putInstallHeader
+     cabalInstall extraArgs pkg

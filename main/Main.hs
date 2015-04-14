@@ -1,13 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Module      : Main
-Description : Haskell Package Signing Tool - CLI
+Description : Haskell Package Signing Tool: Main
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
 Maintainer  : Tim Dysinger <tim@fpcomplete.com>
@@ -42,52 +38,68 @@ import Sig.Install ( install )
 import Sig.List ( list )
 import Sig.Sign ( sign )
 import Sig.Trust ( trust )
+import Sig.Types ( exMsg )
 import Sig.Update ( update )
+import System.IO ( hPutStr, stderr )
 
 -- | Main entry point.
-main :: IO ()
+main :: IO ExitCode
 main =
-  join (execParser
-          (info (helper <*>
-                 subparser (command "check"
-                                    (info (helper <*>
-                                           (check <$>
-                                            argument str (metavar "PACKAGE")))
-                                          (fullDesc <>
-                                           progDesc "Check Package")) <>
-                            command "init"
-                                    (info (helper <*> pure initialize)
-                                          (fullDesc <>
-                                           progDesc "Initialize")) <>
-                            command "install"
-                                    (info (helper <*>
-                                           (install <$>
-                                            argument str (metavar "PACKAGE")))
-                                          (fullDesc <>
-                                           progDesc "Install Package")) <>
-                            command "mappings"
-                                    (info (helper <*> pure list)
-                                          (fullDesc <>
-                                           progDesc "List Mappings")) <>
-                            command "sign"
-                                    (info (helper <*>
-                                           (sign <$>
-                                            argument str (metavar "PATH")))
-                                          (fullDesc <>
-                                           progDesc "Sign Package(s)")) <>
-                            command "trust"
-                                    (info (helper <*>
-                                           (trust <$>
-                                            argument str (metavar "NAME")))
-                                          (fullDesc <>
-                                           progDesc "Trust Mappings")) <>
-                            command "update"
-                                    (info (helper <*> pure update)
-                                          (fullDesc <>
-                                           progDesc "Update the Archive"))))
-                (fullDesc <>
-                 header ("sig " <> packageVersion <> " " <> buildDate) <>
-                 progDesc "Haskell Package Signing Tool")))
+  do args <- getArgs
+     let (optParseArgs,extraArgs) =
+           let (l,r) = span ("--" /=) args
+           in (l,dropWhile ("--" ==) r)
+     withArgs optParseArgs
+              (do catch (do join (execOptParse extraArgs)
+                            exitSuccess)
+                        (\e ->
+                           do hPutStr stderr ("ERROR: " <> exMsg e <> "\n")
+                              exitFailure))
+
+execOptParse :: [String] -> IO (IO ())
+execOptParse extraArgs =
+  execParser
+    (info (helper <*>
+           subparser (command "check"
+                              (info (helper <*>
+                                     (check extraArgs <$>
+                                      argument str (metavar "PACKAGE")))
+                                    (fullDesc <>
+                                     progDesc "Check Package")) <>
+                      command "init"
+                              (info (helper <*> pure initialize)
+                                    (fullDesc <>
+                                     progDesc "Initialize")) <>
+                      command "install"
+                              (info (helper <*>
+                                     (install extraArgs <$>
+                                      argument str (metavar "PACKAGE")))
+                                    (fullDesc <>
+                                     progDesc "Install Package")) <>
+                      command "mappings"
+                              (info (helper <*> pure list)
+                                    (fullDesc <>
+                                     progDesc "List Mappings")) <>
+                      command "sign"
+                              (info (helper <*>
+                                     (sign <$>
+                                      argument str (metavar "PATH")))
+                                    (fullDesc <>
+                                     progDesc "Sign Package(s)")) <>
+                      command "trust"
+                              (info (helper <*>
+                                     (trust <$>
+                                      argument str (metavar "FINGERPRINT") <*>
+                                      argument str (metavar "EMAIL")))
+                                    (fullDesc <>
+                                     progDesc "Trust Mappings")) <>
+                      command "update"
+                              (info (helper <*> pure update)
+                                    (fullDesc <>
+                                     progDesc "Update the Archive"))))
+          (fullDesc <>
+           header ("sig " <> packageVersion <> " " <> buildDate) <>
+           progDesc "Haskell Package Signing Tool"))
 
 packageVersion :: String
 packageVersion =

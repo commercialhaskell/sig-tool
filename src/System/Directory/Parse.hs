@@ -1,12 +1,20 @@
 {-# LANGUAGE TupleSections #-}
 
--- | Parsing directories.
+{-|
+Module      : System.Directory.Parse
+Description : Haskell Package Signing Tool: Directory Parsing
+Copyright   : (c) FPComplete.com, 2015
+License     : BSD3
+Maintainer  : Tim Dysinger <tim@fpcomplete.com>
+Stability   : experimental
+Portability : POSIX
+-}
 
 module System.Directory.Parse where
 
-import Data.Maybe
-import System.Directory
-import System.FilePath
+import Data.Maybe ( mapMaybe )
+import System.Directory ( getDirectoryContents )
+import System.FilePath ( (</>) )
 
 -- | Parse a directory contents semantically.
 parseDirectory :: FilePath            -- ^ The directory to look inside of.
@@ -23,11 +31,11 @@ parseDirectory dir parse =
 filterDirectory :: FilePath         -- ^ The directory to look inside of.
                 -> (String -> Bool) -- ^ A predicate for each entry in the directory.
                 -> IO [FilePath]    -- ^ A list of filtered paths.
-filterDirectory dir pred =
+filterDirectory dir pred' =
   fmap (map fst)
        (parseDirectory
           dir
           (\fp ->
-             if pred fp
+             if pred' fp
                 then Just fp
                 else Nothing))

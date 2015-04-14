@@ -9,3 +9,5 @@ tags
 *.tag
 .cabal-sandbox
 cabal.sandbox.config
+/*.dot
+/*.svg

@@ -1,9 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE RankNTypes #-}
 
 {-|
 Module      : Sig.Trust
-Description : Haskell Package Signing Tool - CLI
+Description : Haskell Package Signing Tool: Trusting Mappings by Key
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
 Maintainer  : Tim Dysinger <tim@fpcomplete.com>
@@ -14,9 +13,31 @@ Portability : POSIX
 module Sig.Trust where
 
 import BasePrelude
-import Control.Monad.IO.Class ( MonadIO )
+import Sig.Config ( readConfig, addSigner )
+import Sig.GPG ( keyExists )
+import Sig.Types
+    ( SigException(GPGKeyMissingException, InvalidEmailException),
+      FingerprintSample(FingerprintSample),
+      Signer(Signer) )
+import Text.Email.Validate ( validate )
 
-trust :: forall m a.
-        MonadIO m
-     => String -> m a
-trust _name = error "not implemented"
+trust :: String -> String -> IO ()
+trust fingerprint email =
+  do cfg <- readConfig
+     -- FIXME: always throws an exception :|
+     -- case eitherDecode (fromString fingerprint) of
+     --   Left e ->
+     --     throwIO (InvalidFingerprintException e)
+     --   Right fingerprint' ->
+     (case validate (fromString email) of
+        Left e ->
+          throwIO (InvalidEmailException e)
+        Right email' ->
+          do let signer =
+                   Signer (FingerprintSample (fromString fingerprint)) email'
+             exists <- keyExists signer
+             when (not exists)
+                  (throwIO (GPGKeyMissingException
+                              ("could not find key with fingerprint " <>
+                               fingerprint)))
+             addSigner cfg signer)
