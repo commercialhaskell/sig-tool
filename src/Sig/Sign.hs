@@ -65,7 +65,7 @@ sign filePath =
                 fingerprint <-
                   GPG.fingerprintFromVerify sig filePath
                 req <-
-                  parseUrl ("http://localhost:3000/upload/signature/" <> name <>
+                  parseUrl ("http://52.5.250.180:3000/upload/signature/" <> name <>
                             "/" <> version <> "/" <>
                             T.unpack (fingerprintSample fingerprint))
                 let put =

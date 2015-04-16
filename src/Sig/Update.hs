@@ -37,7 +37,7 @@ update =
          configPath = home </> configDir
          archivePath = configPath </> archiveDir
      request <-
-       parseUrl "http://localhost:3000/download/archive"
+       parseUrl "http://52.5.250.180:3000/download/archive"
      -- DO WE HAVE A PERMANENT URL THAT WE CAN PUT IN HERE OR DO WE
      -- NEED CONFIG PARAMS?
      catch
