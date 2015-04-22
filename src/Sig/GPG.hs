@@ -39,7 +39,7 @@ sign :: FilePath -> IO Signature
 sign path =
   do (code,out,err) <-
        readProcessWithExitCode "gpg"
-                               ["--output","-","--detach-sig","--armor",path]
+                               ["--output","-","--use-agent","--detach-sig","--armor",path]
                                mempty
      if code /= ExitSuccess
         then throwIO (GPGSignException err)
