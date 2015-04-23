@@ -18,8 +18,8 @@ Initialize your local signature repository with the following:
 
     sig init
 
-This will drop a default config file in <file:///home/tim/.sig/config.yaml> and
-update your [signature archive](https://github.com/commercialhaskell/sig-archive) in the folder <file:///home/tim/.sig/sig-archive>.
+This will drop a default config file in ~/.sig/config.yaml and
+update your [signature archive](https://github.com/commercialhaskell/sig-archive) in the folder ~/.sig/sig-archive
 
 # Listing Trusted Mappings (People to Package Signatures)
 
@@ -42,7 +42,7 @@ Try checking the yesod package with the following:
     sig check yesod
 
 You'll probably get an immediate error. "ERROR: no verifiable
-signature for <file:///home/tim/.sig/sig-archive/mappings/yesod.yaml>"
+signature for ~/.sig/sig-archive/mappings/yesod.yaml"
 
 This means we have a signature mapping file in the archive for yesod
 but we don't trust it yet.  In order to trust the mapping file we
@@ -76,7 +76,7 @@ my key.
 
     sig trust 44A52A60 tim@dysinger.net
 
-This will update your <file:///home/tim/.sig/config.yaml> file.  We can now go back
+This will update your ~/.sig/config.yaml file.  We can now go back
 to verifying yesod.  Type the following:
 
     sig check yesod
