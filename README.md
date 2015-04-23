@@ -21,20 +21,6 @@ Initialize your local signature repository with the following:
 This will drop a default config file in ~/.sig/config.yaml and
 update your [signature archive](https://github.com/commercialhaskell/sig-archive) in the folder ~/.sig/sig-archive
 
-# Listing Trusted Mappings (People to Package Signatures)
-
-First let's look at a list of what \`sig\` thinks is the list of valid
-package signers.  Type the following:
-
-    sig mappings
-
-# Updating Trusted Mappings (Periodically)
-
-Just like cabal update, from time to time you should run \`sig
-update\` to update your mappings & signatures.
-
-    sig update
-
 # Trusting Signers & Checking Package Signatures
 
 Try checking the yesod package with the following:
@@ -89,6 +75,20 @@ the sig command after a double-dash. This enables you to alter
 cabal-install's behavior.
 
     sig check yesod-1.4.1.5 -- --enable-tests
+
+# Updating Trusted Mappings (Periodically)
+
+Just like cabal update, from time to time you should run \`sig
+update\` to update your mappings & signatures.
+
+    sig update
+
+# Listing Trusted Mappings (People to Package Signatures)
+
+First let's look at a list of what \`sig\` thinks is the list of valid
+package signers.  Type the following:
+
+    sig mappings
 
 # Installing a Package
 
