@@ -69,7 +69,7 @@ First fetch my key if you don't have it:
 
 After you receive the key, you should contact me to verify the
 fingerprint.  Then you should sign & trust the key with GPG.  Again,
-read the [Debian Guide](https://wiki.debian.org/Keysigning) on Key-signing for a how-to.
+read the [Debian Guide](https://wiki.debian.org/Keysigning) on key-signing for a how-to.
 
 After you have my key all setup you can then tell sig-tool to trust
 my key.
@@ -105,7 +105,7 @@ You can sign your own package & upload the signature to the
 sig-service.  Try it!
 
 First you need to make sure you have a valid GPG key with which to
-sign packages.  Refer to the [Debian Guide](https://wiki.debian.org/Keysigning) on Key-signing again if
+sign packages.  Refer to the [Debian Guide](https://wiki.debian.org/Keysigning) on key-signing again if
 you don't.
 
 Next you'll need a haskell package to sign. Grab one of your own
@@ -119,9 +119,10 @@ After you have a tarball on disk you can sign & upload the signature. Try this:
 
 # Signing Your Entire Package Tree At Once
 
-You can bulk sign using cabal fetch & [GNU parallel](http://www.gnu.org/software/parallel/).  This is most
-useful while we are bootstrapping & we don't yet have all hackage
-maintainers on board.
+You can bulk sign using \`cabal fetch\`, find & [GNU parallel](http://www.gnu.org/software/parallel/).  This
+will be useful during the initial bootstrapping & testing of this
+service (Because we don't yet have all hackage maintainers &
+signatures in the archive).
 
     % mv ~/.cabal ~/.cabal.bak
     % mv ~/.ghc ~/.ghc.bak
