@@ -161,6 +161,7 @@ instance ToJSON Config where
 data SigException
   = ArchiveUpdateException { exMsg :: String }
   | CabalFetchException { exMsg :: String }
+  | CabalIndexException { exMsg :: String }
   | CabalInstallException { exMsg :: String }
   | CabalPackageListException { exMsg :: String }
   | ConfigParseException { exMsg :: String }
@@ -168,6 +169,7 @@ data SigException
   | GPGNoSignatureException { exMsg :: String }
   | GPGSignException { exMsg :: String }
   | GPGVerifyException { exMsg :: String }
+  | HackageAPIException { exMsg :: String }
   | InvalidEmailException { exMsg :: String }
   | InvalidFingerprintException { exMsg :: String }
   | MappingParseException { exMsg :: String }
