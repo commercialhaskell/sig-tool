@@ -22,7 +22,7 @@ import Sig.Archive ( readArchive )
 import Sig.Cabal ( cabalInstallDryRun, cabalFetch )
 import Sig.Config ( readConfig )
 import Sig.Defaults ( configDir, archiveDir )
-import Sig.Doc ( putCheckHeader, putPkgVerify )
+import Sig.Doc ( putHeader, putPkgOK )
 import Sig.GPG ( verifyPackage, verifyMappings )
 import Sig.Types ( Archive(archiveMappings) )
 import System.Directory ( getHomeDirectory )
@@ -37,7 +37,7 @@ check extraArgs pkg =
      verifyMappings cfg
                     (archiveMappings arch)
                     archDir
-     putCheckHeader
+     putHeader "Verifying Packages"
      pkgs <- cabalInstallDryRun extraArgs pkg
      forM_ pkgs
            (\p ->
@@ -52,4 +52,4 @@ check extraArgs pkg =
                        (name <> "-" <> version) <>
                        ".tar.gz"
                  verifyPackage arch p path
-                 putPkgVerify p)
+                 putPkgOK p)

@@ -15,10 +15,10 @@ module Sig.Install where
 import BasePrelude
 import Sig.Cabal ( cabalInstall )
 import Sig.Check ( check )
-import Sig.Doc ( putInstallHeader )
+import Sig.Doc ( putHeader )
 
 install :: [String] -> String -> IO ()
 install extraArgs pkg =
   do check extraArgs pkg
-     putInstallHeader
+     putHeader "Verifying Packages"
      cabalInstall extraArgs pkg

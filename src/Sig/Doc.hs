@@ -1,5 +1,6 @@
 {-# LANGUAGE ExtendedDefaultRules #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -16,11 +17,17 @@ Portability : POSIX
 -}
 
 module Sig.Doc
-       (ToDoc(..), putToDoc, putCheckHeader, putPkgVerify,
-        putInstallHeader)
+       (ToDoc(..), putToDoc, putHeader, putPkgOK)
        where
 
-import BasePrelude hiding ((<+>),(<>),(<$>),empty)
+import BasePrelude hiding
+    ( (<>),
+      (<+>),
+      (<$>),
+      empty )
+import Control.Monad.Catch ()
+import Control.Monad.IO.Class ( MonadIO, liftIO )
+import Control.Monad.Trans.Control ()
 import qualified Data.ByteString.Char8 as C ( unpack )
 import Data.Map ( Map )
 import qualified Data.Map.Strict as M ( toList )
@@ -127,21 +134,22 @@ instance ToDoc PackageIdentifier where
 instance ToDoc PackageName where
   toDoc = text . display
 
-putToDoc :: forall a. ToDoc a => a -> IO ()
-putToDoc = putDoc . toDoc
+putToDoc :: forall a (m :: * -> *).
+            (ToDoc a,MonadIO m)
+         => a -> m ()
+putToDoc = liftIO . putDoc . toDoc
 
-putCheckHeader :: IO ()
-putCheckHeader =
-  putDoc (text "Checking" <>
-          linebreak)
+putHeader :: forall (m :: * -> *).
+             MonadIO m
+          => String -> m ()
+putHeader a =
+  liftIO (putDoc (text a <> linebreak))
 
-putPkgVerify :: PackageIdentifier -> IO ()
-putPkgVerify pkg =
-  putDoc (text "  " <> -- HACK - indent/hang/nest didn't work
-          fill 74 (toDoc pkg) <>
-          "OK" <>
-          linebreak)
-
-putInstallHeader :: IO ()
-putInstallHeader =
-  putDoc ("Installing" <> linebreak)
+putPkgOK :: forall (m :: * -> *).
+            MonadIO m
+         => PackageIdentifier -> m ()
+putPkgOK pkg =
+  liftIO (putDoc (text "  " <>
+                  fill 74 (toDoc pkg) <>
+                  "OK" <>
+                  linebreak))
