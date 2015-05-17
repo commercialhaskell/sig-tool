@@ -119,15 +119,4 @@ After you have a tarball on disk you can sign & upload the signature. Try this:
 
 # Signing Your Entire Package Tree At Once
 
-You can bulk sign using \`cabal fetch\`, find & [GNU parallel](http://www.gnu.org/software/parallel/).  This
-will be useful during the initial bootstrapping & testing of this
-service (Because we don't yet have all hackage maintainers &
-signatures in the archive).
-
-    % mv ~/.cabal ~/.cabal.bak
-    % mv ~/.ghc ~/.ghc.bak
-    % cabal update
-    % cabal fetch yesod
-    % find ~/.cabal/packages -name '*.tar.gz'|grep -v 00-index|parallel --no-notice sig sign
-
-This is what I used to sign the entire yesod package tree.
+    sig sign-all <hackage-username>
