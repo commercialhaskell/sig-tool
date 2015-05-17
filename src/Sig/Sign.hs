@@ -91,7 +91,7 @@ signAll uname =
                       (map pkgName fromHackage))
                    fromIndex)
            (\pkg ->
-              liftIO (do cabalFetch [] pkg
+              liftIO (do cabalFetch ["--no-dependencies"] pkg
                          filePath <- getPackageTarballPath pkg
                          signPackage pkg filePath
                          putPkgOK pkg))
