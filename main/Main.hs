@@ -36,7 +36,7 @@ import Sig.Check ( check )
 import Sig.Init ( initialize )
 import Sig.Install ( install )
 import Sig.List ( list )
-import Sig.Sign ( sign )
+import Sig.Sign ( sign, signAll )
 import Sig.Trust ( trust )
 import Sig.Types ( exMsg )
 import Sig.Update ( update )
@@ -85,7 +85,13 @@ execOptParse extraArgs =
                                      (sign <$>
                                       argument str (metavar "PATH")))
                                     (fullDesc <>
-                                     progDesc "Sign Package(s)")) <>
+                                     progDesc "Sign a sdist Tarball")) <>
+                      command "sign-all"
+                              (info (helper <*>
+                                     (signAll <$>
+                                      argument str (metavar "USER")))
+                                    (fullDesc <>
+                                     progDesc "Sign Your Hackage Packages")) <>
                       command "trust"
                               (info (helper <*>
                                      (trust <$>
