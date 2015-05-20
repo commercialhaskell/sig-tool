@@ -19,6 +19,8 @@ ENV PATH /opt/ghc/7.8.4/bin:/opt/cabal/1.20/bin:/opt/happy/1.19.3/bin:/opt/alex/
 # PROJECT
 ADD ./ /usr/local/src/
 WORKDIR /usr/local/src/
+RUN apt-get install -y wget
+RUN wget http://www.stackage.org/lts/cabal.config
 RUN cabal update
 RUN cabal install -j --global --prefix=/usr/local
 WORKDIR /
