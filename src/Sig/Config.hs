@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -24,10 +25,15 @@ import System.Directory
       doesFileExist,
       createDirectoryIfMissing )
 import System.FilePath ( (</>) )
-import System.Locale ( defaultTimeLocale )
 import qualified Data.ByteString as B ( writeFile, readFile )
 import qualified Data.Yaml as Y ( encode, decodeEither )
 import Text.Email.Validate ( emailAddress )
+
+#if MIN_VERSION_time(1,5,0)
+import Data.Time ( defaultTimeLocale )
+#else
+import System.Locale ( defaultTimeLocale )
+#endif
 
 defaultSigners :: [Signer]
 defaultSigners =

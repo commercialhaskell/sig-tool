@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 {-|
@@ -26,8 +27,13 @@ import System.Directory
       getHomeDirectory,
       doesDirectoryExist )
 import System.FilePath ( (</>) )
-import System.Locale ( defaultTimeLocale )
 import System.Process ( readProcessWithExitCode )
+
+#if MIN_VERSION_time(1,5,0)
+import Data.Time ( defaultTimeLocale )
+#else
+import System.Locale ( defaultTimeLocale )
+#endif
 
 update :: IO ()
 update =
