@@ -1,6 +1,6 @@
 #-*- mode:conf; -*-
 
-FROM ubuntu:trusty
+FROM ubuntu:14.04
 MAINTAINER Tim Dysinger <tim@fpcomplete.com>
 
 # LOCALES
