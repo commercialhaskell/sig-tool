@@ -110,7 +110,7 @@ signPackage pkg filePath =
      -- DO WE HAVE A PERMANENT URL YET? & DO WE NEED A FLEXIBLE
      -- RUN-TIME CONFIG.YAML SERVER SETTING?
      req <-
-       parseUrl ("http://52.5.250.180:3000/upload/signature/" <> name <> "/" <>
+       parseUrl ("http://sig-service-1087981903.us-east-1.elb.amazonaws.com/upload/signature/" <> name <> "/" <>
                  version <> "/" <>
                  T.unpack (fingerprintSample fingerprint))
      let put =
