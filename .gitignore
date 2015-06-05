@@ -11,3 +11,5 @@ tags
 cabal.sandbox.config
 /*.dot
 /*.svg
+/.stack-work/
+/dist-stack/
