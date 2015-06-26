@@ -51,49 +51,10 @@ import Distribution.PackageDescription.Parse
 import Distribution.Text ( Text(disp), simpleParse )
 import Distribution.Verbosity ( silent )
 import Sig.Types
-    ( SigException(CabalFetchException, CabalInstallException,
-                   CabalIndexException, CabalPackageListException) )
+       (SigException(CabalFetchException, CabalIndexException))
 import System.Directory ( doesFileExist, getAppUserDataDirectory )
 import System.FilePath ( (</>) )
-import System.Process
-    ( waitForProcess, spawnProcess, readProcessWithExitCode )
-
-cabalInstallDryRun :: [String]
-                   -> String
-                   -> IO [PackageIdentifier]
-cabalInstallDryRun opts pkg =
-  do (code,out,err) <-
-       readProcessWithExitCode
-         "cabal"
-         (["install","--dry-run","","--package-db=clear","--package-db-global"] ++
-          opts ++
-          [pkg])
-         mempty
-     if code /= ExitSuccess
-        then throwIO (CabalPackageListException err)
-        else return (if (head . reverse . lines $ out) ==
-                        "Use --reinstall if you want to reinstall anyway."
-                        then empty
-                        else stdoutToPackageIdentifiers out)
-  where stdoutToPackageIdentifiers :: String -> [PackageIdentifier]
-        stdoutToPackageIdentifiers =
-          map ((\(version:reverseName) ->
-                  -- TODO use the PI parser
-                  PackageIdentifier
-                    (PackageName
-                       (intercalate "-"
-                                    (reverse reverseName)))
-                    (Version {versionBranch =
-                                map read (splitOn "." version)
-                             ,versionTags = []})) . {- FIXME Deprecated: "See GHC ticket #2496" -}
-               -- if people use 'tags' then this fn won't work, I'll
-               -- have to parse smarter
-               reverse .
-               splitOn "-") .
-          map (head .
-               splitOn " ") .
-          drop 2 .
-          lines
+import System.Process (readProcessWithExitCode)
 
 cabalFetch :: [String] -> PackageIdentifier -> IO ()
 cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) =
@@ -110,19 +71,6 @@ cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) =
          mempty
      if code /= ExitSuccess
         then throwIO (CabalFetchException err)
-        else return ()
-
-cabalInstall :: [String] -> String -> IO ()
-cabalInstall opts pkg =
-  do code <-
-       waitForProcess =<<
-       spawnProcess
-         "cabal"
-         (["install"] ++
-          opts ++
-          [pkg])
-     if code /= ExitSuccess
-        then throwIO (CabalInstallException "unable to cabal-install")
         else return ()
 
 cabalFilePackageId :: FilePath -> IO PackageIdentifier

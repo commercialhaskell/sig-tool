@@ -16,49 +16,25 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Doc
-       (ToDoc(..), putToDoc, putHeader, putPkgOK)
-       where
+module Sig.Doc where
 
-import BasePrelude hiding
-    ( (<>),
-      (<+>),
-      (<$>),
-      empty )
+import BasePrelude hiding ((<>), empty)
 import Control.Monad.Catch ()
 import Control.Monad.IO.Class ( MonadIO, liftIO )
 import Control.Monad.Trans.Control ()
-import qualified Data.ByteString.Char8 as C ( unpack )
-import Data.Map ( Map )
-import qualified Data.Map.Strict as M ( toList )
-import Data.Set ( Set )
-import qualified Data.Set as S ( toList )
 import Data.Text ( Text )
 import qualified Data.Text as T ( unpack )
 import Distribution.Package
     ( PackageName, PackageIdentifier(pkgName, pkgVersion) )
 import Distribution.Text ( display )
-import Sig.Types
-    ( Config(..),
-      FingerprintSample(FingerprintSample),
-      Signer(..),
-      Mapping(..),
-      Signature,
-      Archive(..) )
-import Text.Email.Validate ( EmailAddress, toByteString )
 import Text.PrettyPrint.ANSI.Leijen
     ( Doc,
-      vsep,
       text,
       putDoc,
       linebreak,
-      indent,
-      hang,
       fill,
       empty,
-      (<>),
-      (<+>),
-      (<$>) )
+      (<>) )
 
 default (Text)
 
@@ -68,57 +44,6 @@ class ToDoc a where
 
 instance ToDoc Text where
   toDoc = text . T.unpack
-
-instance ToDoc Config where
-  toDoc Config{..} =
-    text "Trusted Signers:" <$>
-    hang 2 (indent 2 (vsep (map toDoc configTrustedMappingSigners))) <>
-    linebreak
-
-instance ToDoc Archive where
-  toDoc Archive{..} =
-    text "Mappings:" <$>
-    hang 2 (indent 2 (toDoc archiveMappings)) <>
-    text "Signatures:" <$>
-    hang 2 (indent 2 (toDoc archiveSignatures))
-
-instance ToDoc (Map Text Mapping) where
-  toDoc x =
-    vsep (map (\(a,b) ->
-                 toDoc a <$>
-                 hang 2 (indent 2 (toDoc b)))
-              (M.toList x)) <>
-    linebreak
-
-instance ToDoc (Map PackageIdentifier (Set Signature)) where
-  toDoc x =
-    vsep (map (\(a,b) ->
-                 toDoc a <$>
-                 hang 2 (indent 2 (vsep (map toDoc (S.toList b)))))
-              (M.toList x)) <>
-    linebreak
-
-instance ToDoc Mapping where
-  toDoc Mapping{..} =
-    vsep (map (\(a,b) ->
-                 toDoc a <$>
-                 hang 2 (indent 2 (vsep (map toDoc (S.toList b)))))
-              (M.toList mappingSigners))
-
-instance ToDoc Signer where
-  toDoc Signer{..} =
-    toDoc signerFingerprint <+>
-    toDoc signerEmail
-
-instance ToDoc Signature where
-  toDoc = text . show
-
-instance ToDoc EmailAddress where
-  toDoc = text . C.unpack . toByteString
-
-instance ToDoc FingerprintSample where
-  toDoc (FingerprintSample x) = toDoc x
-
 instance ToDoc PackageIdentifier where
   toDoc x =
     toDoc (pkgName x) <>
