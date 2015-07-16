@@ -21,7 +21,7 @@ import Data.Aeson
     ( Value(String), ToJSON(..), FromJSON(..), object, (.=), (.:) )
 import Data.ByteString ( ByteString )
 import qualified Data.ByteString as SB ( take, length )
-import Data.Char ( isDigit, isAlpha, isSpace )
+import Data.Char ( isDigit, isAlpha )
 import Data.Map.Strict ( Map )
 import qualified Data.Map.Strict as M ( fromList )
 import Data.Set ( Set )
@@ -97,7 +97,7 @@ newtype Aeson a =
   Aeson {unAeson :: a}
   deriving (Ord,Eq)
 
--- | The full GPG fingerprint.
+-- | The last few digits of a GPG fingerprint.
 newtype FingerprintSample =
   FingerprintSample {fingerprintSample :: Text}
   deriving (Eq,Ord,Show)
@@ -105,9 +105,9 @@ newtype FingerprintSample =
 instance FromJSON FingerprintSample where
   parseJSON j =
     do s <- parseJSON j
-       if T.all (\c -> isAlpha c || isDigit c || isSpace c) s
+       if T.all (\c -> isAlpha c || isDigit c) s
           then return (FingerprintSample s)
-          else fail ("Expected finger print sample, but got: " ++
+          else fail ("Expected finger print sample (alphanumeric), but got: " ++
                      T.unpack s)
 
 instance ToJSON FingerprintSample where
