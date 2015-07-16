@@ -55,8 +55,8 @@ import System.Directory
 import System.FilePath ( (</>) )
 import System.Process ( readProcessWithExitCode )
 
-sign :: FilePath -> IO ()
-sign filePath =
+sign :: String -> FilePath -> IO ()
+sign url filePath =
   do putHeader "Signing Package"
      tempDir <- getTemporaryDirectory
      uuid <- nextRandom
@@ -76,13 +76,13 @@ sign filePath =
         then undefined
         else do pkg <-
                   cabalFilePackageId (workDir </> head cabalFiles)
-                signPackage pkg filePath
+                signPackage url pkg filePath
                 putPkgOK pkg
 
 signAll :: forall (m :: * -> *).
            (MonadIO m,MonadThrow m,MonadBaseControl IO m)
-        => String -> m ()
-signAll uname =
+        => String -> String -> m ()
+signAll url uname =
   do putHeader "Signing Packages"
      fromHackage <- packagesForMaintainer uname
      fromIndex <- packagesFromIndex
@@ -91,33 +91,30 @@ signAll uname =
                       (map pkgName fromHackage))
                    fromIndex)
            (\pkg ->
-              liftIO (do cabalFetch ["--no-dependencies"] pkg
+              liftIO (do cabalFetch ["--no-dependencies"]
+                                    pkg
                          filePath <- getPackageTarballPath pkg
-                         signPackage pkg filePath
+                         signPackage url pkg filePath
                          putPkgOK pkg))
 
 --------------
 -- Internal --
 --------------
 
-signPackage :: PackageIdentifier -> FilePath -> IO ()
-signPackage pkg filePath =
+signPackage :: String -> PackageIdentifier -> FilePath -> IO ()
+signPackage url pkg filePath =
   do sig@(Signature signature) <- GPG.sign filePath
      let (PackageName name) = pkgName pkg
          version = showVersion (pkgVersion pkg)
      fingerprint <-
        GPG.fingerprintFromVerify sig filePath
-     -- DO WE HAVE A PERMANENT URL YET? & DO WE NEED A FLEXIBLE
-     -- RUN-TIME CONFIG.YAML SERVER SETTING?
      req <-
-       parseUrl ("http://sig-service-1087981903.us-east-1.elb.amazonaws.com/upload/signature/" <> name <> "/" <>
-                 version <> "/" <>
+       parseUrl (url <> "/upload/signature/" <> name <> "/" <> version <> "/" <>
                  T.unpack (fingerprintSample fingerprint))
      let put =
            req {method = methodPut
                ,requestBody =
                   RequestBodyBS signature}
      res <- withManager (httpLbs put)
-     if responseStatus res /= status200
-        then throwIO (GPGSignException "unable to sign & upload package")
-        else return ()
+     when (responseStatus res /= status200)
+          (throwIO (GPGSignException "unable to sign & upload package"))
