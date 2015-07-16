@@ -72,7 +72,8 @@ execOptParse extraArgs =
                                     (fullDesc <>
                                      progDesc "Check Package")) <>
                       command "init"
-                              (info (helper <*> pure initialize)
+                              (info (helper <*>
+                                     (initialize <$> url))
                                     (fullDesc <>
                                      progDesc "Initialize")) <>
                       command "install"
@@ -105,7 +106,8 @@ execOptParse extraArgs =
                                     (fullDesc <>
                                      progDesc "Trust Mappings")) <>
                       command "update"
-                              (info (helper <*> pure update)
+                              (info (helper <*>
+                                     (update <$> url))
                                     (fullDesc <>
                                      progDesc "Update the Archive"))))
           (fullDesc <>

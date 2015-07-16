@@ -35,17 +35,15 @@ import Data.Time ( defaultTimeLocale )
 import System.Locale ( defaultTimeLocale )
 #endif
 
-update :: IO ()
-update =
+update :: String -> IO ()
+update url =
   do home <- getHomeDirectory
      temp <- getTemporaryDirectory
      let tempFile = temp </> "sig-archive.tar.gz"
          configPath = home </> configDir
          archivePath = configPath </> archiveDir
      request <-
-       parseUrl "http://52.5.250.180:3000/download/archive"
-     -- DO WE HAVE A PERMANENT URL THAT WE CAN PUT IN HERE OR DO WE
-     -- NEED CONFIG PARAMS?
+       parseUrl (url <> "/download/archive")
      catch
        (withManager
           (\mgr ->

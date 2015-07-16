@@ -13,7 +13,7 @@ module Sig.Init where
 import Sig.Config ( defaultConfig, writeConfigIfMissing )
 import Sig.Update ( update )
 
-initialize :: IO ()
-initialize =
+initialize :: String -> IO ()
+initialize url =
   do writeConfigIfMissing defaultConfig
-     update
+     update url
