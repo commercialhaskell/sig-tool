@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -177,4 +178,6 @@ data SigException
   deriving (Show,Typeable)
 
 instance Exception SigException where
--- showMessage = exMsg -- ghc 7.10
+#if __GLASGOW_HASKELL__ >= 710
+  displayException = exMsg
+#endif
