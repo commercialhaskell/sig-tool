@@ -31,12 +31,7 @@ import Options.Applicative
       header,
       fullDesc,
       command,
-      argument,
-      strOption,
-      long,
-      short,
-      showDefault,
-      value )
+      argument )
 import Sig.Sign ( sign, signAll )
 
 -- | Main entry point.
@@ -46,25 +41,19 @@ main =
           (info (helper <*>
                  subparser (command "sdist"
                                     (info (helper <*>
-                                           (sign <$> url <*>
+                                           (sign <$>
                                             argument str (metavar "PATH")))
                                           (fullDesc <>
                                            progDesc "Sign a single sdist tarball")) <>
                             command "hackage"
                                     (info (helper <*>
-                                           (signAll <$> url <*>
+                                           (signAll <$>
                                             argument str (metavar "USER")))
                                           (fullDesc <>
                                            progDesc "Sign all your Hackage packages"))))
                 (fullDesc <>
                  header ("sig " <> packageVersion <> " " <> buildDate) <>
                  progDesc "Haskell Package Signing Tool")))
-  where url =
-          strOption (long "url" <>
-                     short 'u' <>
-                     metavar "URL" <>
-                     showDefault <>
-                     value "https://sig.commercialhaskell.org")
 
 packageVersion :: String
 packageVersion =
