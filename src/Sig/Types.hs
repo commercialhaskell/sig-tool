@@ -16,7 +16,7 @@ Portability : POSIX
 
 module Sig.Types where
 
-import Control.Exception ( Exception(..) )
+import Control.Exception ( Exception )
 import Data.Aeson
     ( Value(String), ToJSON(..), FromJSON(..), object, (.=), (.:) )
 import Data.ByteString ( ByteString )
@@ -169,5 +169,5 @@ data SigException
 
 instance Exception SigException where
 #if __GLASGOW_HASKELL__ >= 710
-  displayException = exMsg
+  showMessage = exMsg
 #endif
