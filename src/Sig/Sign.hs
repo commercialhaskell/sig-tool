@@ -98,7 +98,7 @@ signPackage pkg filePath =
      fingerprint <-
        GPG.fingerprintFromVerify sig filePath
      req <-
-       parseUrl ("http://sig-service-elb-vpc-e1757b84-1712462868.us-east-1.elb.amazonaws.com/upload/signature/" <> name <> "/" <>
+       parseUrl ("http://sig.fpcenter.io/upload/signature/" <> name <> "/" <>
                  version <> "/" <>
                  T.unpack (fingerprintSample fingerprint))
      let put =
