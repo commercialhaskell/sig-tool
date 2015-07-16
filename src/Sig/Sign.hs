@@ -16,7 +16,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Sign where
+module Sig.Sign (sign, signAll) where
 
 import BasePrelude
 import Control.Monad.Catch ( MonadThrow )
@@ -41,10 +41,13 @@ import Sig.Cabal
       cabalFilePackageId,
       packagesFromIndex,
       getPackageTarballPath )
-import Sig.Doc
-import qualified Sig.GPG as GPG
-import Sig.Hackage
+import Sig.Doc ( putHeader, putPkgOK )
+import qualified Sig.GPG as GPG ( sign, fingerprintFromVerify )
+import Sig.Hackage ( packagesForMaintainer )
 import Sig.Types
+    ( SigException(GPGSignException),
+      FingerprintSample(fingerprintSample),
+      Signature(Signature) )
 import System.Directory
     ( getTemporaryDirectory,
       getDirectoryContents,
@@ -59,6 +62,9 @@ sign filePath =
      uuid <- nextRandom
      let workDir = tempDir </> toString uuid
      createDirectoryIfMissing True workDir
+     -- TODO USE HASKELL'S `TAR` PACKAGE FOR EXTRACTING MIGHT WORK
+     -- BETTER ON SOME PLATFORMS THAN readProcessWithExitCode +
+     -- TAR.EXE
      (_code,_out,_err) <-
        readProcessWithExitCode "tar"
                                ["xf",filePath,"-C",workDir,"--strip","1"]
@@ -90,6 +96,10 @@ signAll uname =
                          signPackage pkg filePath
                          putPkgOK pkg))
 
+--------------
+-- Internal --
+--------------
+
 signPackage :: PackageIdentifier -> FilePath -> IO ()
 signPackage pkg filePath =
   do sig@(Signature signature) <- GPG.sign filePath
@@ -97,8 +107,10 @@ signPackage pkg filePath =
          version = showVersion (pkgVersion pkg)
      fingerprint <-
        GPG.fingerprintFromVerify sig filePath
+     -- DO WE HAVE A PERMANENT URL YET? & DO WE NEED A FLEXIBLE
+     -- RUN-TIME CONFIG.YAML SERVER SETTING?
      req <-
-       parseUrl ("http://sig.fpcenter.io/upload/signature/" <> name <> "/" <>
+       parseUrl ("http://sig-service-1087981903.us-east-1.elb.amazonaws.com/upload/signature/" <> name <> "/" <>
                  version <> "/" <>
                  T.unpack (fingerprintSample fingerprint))
      let put =

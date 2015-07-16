@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -14,7 +13,15 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Types where
+module Sig.Types
+  (Archive(..)
+  ,Signature(..)
+  ,Mapping(..)
+  ,Signer(..)
+  ,FingerprintSample(..)
+  ,Config(..)
+  ,SigException(..))
+  where
 
 import Control.Exception ( Exception )
 import Data.Aeson
@@ -152,8 +159,10 @@ instance ToJSON Config where
 
 -- | Exceptions
 data SigException
-  = CabalFetchException { exMsg :: String }
+  = ArchiveUpdateException { exMsg :: String }
+  | CabalFetchException { exMsg :: String }
   | CabalIndexException { exMsg :: String }
+  | CabalInstallException { exMsg :: String }
   | CabalPackageListException { exMsg :: String }
   | ConfigParseException { exMsg :: String }
   | GPGKeyMissingException { exMsg :: String }
@@ -168,6 +177,4 @@ data SigException
   deriving (Show,Typeable)
 
 instance Exception SigException where
-#if __GLASGOW_HASKELL__ >= 710
-  showMessage = exMsg
-#endif
+-- showMessage = exMsg -- ghc 7.10

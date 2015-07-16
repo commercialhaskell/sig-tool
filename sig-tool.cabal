@@ -25,13 +25,20 @@ library
                      Sig.Archive
                      Sig.Cabal
                      Sig.Cabal.Parse
+                     Sig.Check
+                     Sig.Config
                      Sig.Defaults
                      Sig.Doc
                      Sig.GPG
                      Sig.Hackage
+                     Sig.Init
+                     Sig.Install
+                     Sig.List
                      Sig.Mapping
                      Sig.Sign
+                     Sig.Trust
                      Sig.Types
+                     Sig.Update
   other-modules:     System.Directory.Parse
   build-depends:     Cabal          >=1.18
                    , aeson          >=0.8

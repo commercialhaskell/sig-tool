@@ -32,28 +32,80 @@ import Options.Applicative
       fullDesc,
       command,
       argument )
+import Sig.Check ( check )
+import Sig.Init ( initialize )
+import Sig.Install ( install )
+import Sig.List ( list )
 import Sig.Sign ( sign, signAll )
+import Sig.Trust ( trust )
+import Sig.Types ( exMsg )
+import Sig.Update ( update )
+import System.IO ( hPutStr, stderr )
 
 -- | Main entry point.
-main :: IO ()
+main :: IO ExitCode
 main =
-  join (execParser
-          (info (helper <*>
-                 subparser (command "sdist"
-                                    (info (helper <*>
-                                           (sign <$>
-                                            argument str (metavar "PATH")))
-                                          (fullDesc <>
-                                           progDesc "Sign a single sdist tarball")) <>
-                            command "hackage"
-                                    (info (helper <*>
-                                           (signAll <$>
-                                            argument str (metavar "USER")))
-                                          (fullDesc <>
-                                           progDesc "Sign all your Hackage packages"))))
-                (fullDesc <>
-                 header ("sig " <> packageVersion <> " " <> buildDate) <>
-                 progDesc "Haskell Package Signing Tool")))
+  do args <- getArgs
+     let (optParseArgs,extraArgs) =
+           let (l,r) = span ("--" /=) args
+           in (l,dropWhile ("--" ==) r)
+     withArgs optParseArgs
+              (do catch (do join (execOptParse extraArgs)
+                            exitSuccess)
+                        (\e ->
+                           do hPutStr stderr ("ERROR: " <> exMsg e <> "\n")
+                              exitFailure))
+
+execOptParse :: [String] -> IO (IO ())
+execOptParse extraArgs =
+  execParser
+    (info (helper <*>
+           subparser (command "check"
+                              (info (helper <*>
+                                     (check extraArgs <$>
+                                      argument str (metavar "PACKAGE")))
+                                    (fullDesc <>
+                                     progDesc "Check Package")) <>
+                      command "init"
+                              (info (helper <*> pure initialize)
+                                    (fullDesc <>
+                                     progDesc "Initialize")) <>
+                      command "install"
+                              (info (helper <*>
+                                     (install extraArgs <$>
+                                      argument str (metavar "PACKAGE")))
+                                    (fullDesc <>
+                                     progDesc "Install Package")) <>
+                      command "mappings"
+                              (info (helper <*> pure list)
+                                    (fullDesc <>
+                                     progDesc "List Mappings")) <>
+                      command "sign"
+                              (info (helper <*>
+                                     (sign <$>
+                                      argument str (metavar "PATH")))
+                                    (fullDesc <>
+                                     progDesc "Sign a sdist Tarball")) <>
+                      command "sign-all"
+                              (info (helper <*>
+                                     (signAll <$>
+                                      argument str (metavar "USER")))
+                                    (fullDesc <>
+                                     progDesc "Sign Your Hackage Packages")) <>
+                      command "trust"
+                              (info (helper <*>
+                                     (trust <$>
+                                      argument str (metavar "FINGERPRINT") <*>
+                                      argument str (metavar "EMAIL")))
+                                    (fullDesc <>
+                                     progDesc "Trust Mappings")) <>
+                      command "update"
+                              (info (helper <*> pure update)
+                                    (fullDesc <>
+                                     progDesc "Update the Archive"))))
+          (fullDesc <>
+           header ("sig " <> packageVersion <> " " <> buildDate) <>
+           progDesc "Haskell Package Signing Tool"))
 
 packageVersion :: String
 packageVersion =
