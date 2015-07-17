@@ -65,7 +65,7 @@ cabalInstallDryRun opts pkg =
   do (code,out,err) <-
        readProcessWithExitCode
          "cabal"
-         (["install","--dry-run","","--package-db=clear","--package-db-global"] ++
+         (["install","--dry-run","--package-db=clear","--package-db=global"] ++
           opts ++
           [pkg])
          mempty
