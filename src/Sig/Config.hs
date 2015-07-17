@@ -42,7 +42,10 @@ defaultSigners =
              fromJust (emailAddress "chrisdone@gmail.com")}
   ,Signer {signerFingerprint = "5E6C 66B2 78BD B10A A636  57FA A048 E8C0 57E8 6876"
           ,signerEmail =
-             fromJust (emailAddress "michael@snoyman.com")}]
+             fromJust (emailAddress "michael@snoyman.com")},
+  Signer {signerFingerprint = "8C69 4F5B 6941 3F16 736F  E055 A9E6 D147 44A5 2A60"
+          ,signerEmail =
+             fromJust (emailAddress "tim@dysinger.net")}]
 
 defaultConfig :: Config
 defaultConfig = Config defaultSigners
