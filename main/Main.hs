@@ -65,55 +65,68 @@ execOptParse :: [String] -> IO (IO ())
 execOptParse extraArgs =
   execParser
     (info (helper <*>
-           subparser (command "check"
-                              (info (helper <*>
-                                     (check extraArgs <$>
-                                      argument str (metavar "PACKAGE")))
-                                    (fullDesc <>
-                                     progDesc "Check Package")) <>
-                      command "init"
-                              (info (helper <*>
-                                     (initialize <$> url))
-                                    (fullDesc <>
-                                     progDesc "Initialize")) <>
-                      command "install"
-                              (info (helper <*>
-                                     (install extraArgs <$>
-                                      argument str (metavar "PACKAGE")))
-                                    (fullDesc <>
-                                     progDesc "Install Package")) <>
-                      command "mappings"
-                              (info (helper <*> pure list)
-                                    (fullDesc <>
-                                     progDesc "List Mappings")) <>
-                      command "sign"
-                              (info (helper <*>
-                                     (sign <$> url <*>
-                                      argument str (metavar "PATH")))
-                                    (fullDesc <>
-                                     progDesc "Sign a sdist Tarball")) <>
-                      command "sign-all"
-                              (info (helper <*>
-                                     (signAll <$> url <*>
-                                      argument str (metavar "USER")))
-                                    (fullDesc <>
-                                     progDesc "Sign Your Hackage Packages")) <>
-                      command "trust"
-                              (info (helper <*>
-                                     (trust <$>
-                                      argument str (metavar "FINGERPRINT") <*>
-                                      argument str (metavar "EMAIL")))
-                                    (fullDesc <>
-                                     progDesc "Trust Mappings")) <>
-                      command "update"
-                              (info (helper <*>
-                                     (update <$> url))
-                                    (fullDesc <>
-                                     progDesc "Update the Archive"))))
+           subparser (checkCmd <> initCmd <> installCmd <> mappingsCmd <>
+                      signCmd <> trustCmd <> updateCmd))
           (fullDesc <>
            header ("sig " <> packageVersion <> " " <> buildDate) <>
            progDesc "Haskell Package Signing Tool"))
-  where url =
+  where checkCmd =
+          command "check"
+                  (info (helper <*>
+                         (check extraArgs <$>
+                          argument str (metavar "PACKAGE")))
+                        (fullDesc <>
+                         progDesc "Check a package"))
+        initCmd =
+          command "init"
+                  (info (helper <*>
+                         (initialize <$> url))
+                        (fullDesc <>
+                         progDesc "Initialize"))
+        installCmd =
+          command "install"
+                  (info (helper <*>
+                         (install extraArgs <$>
+                          argument str (metavar "PACKAGE")))
+                        (fullDesc <>
+                         progDesc "Install package"))
+        mappingsCmd =
+          command "mappings"
+                  (info (helper <*> pure list)
+                        (fullDesc <>
+                         progDesc "List mappings"))
+        signCmd =
+          command "sign"
+                  (info (helper <*>
+                         (subparser (command "sdist"
+                                             (info (helper <*>
+                                                    (sign <$> url <*>
+                                                     argument str (metavar "PATH")))
+                                                   (fullDesc <>
+                                                    progDesc "Sign a single sdist tarball")) <>
+                                     command "hackage"
+                                             (info (helper <*>
+                                                    (signAll <$> url <*>
+                                                     argument str (metavar "USER")))
+                                                   (fullDesc <>
+                                                    progDesc "Sign all your Hackage packages")))))
+                        (fullDesc <>
+                         progDesc "Sign packages"))
+        trustCmd =
+          command "trust"
+                  (info (helper <*>
+                         (trust <$>
+                          argument str (metavar "FINGERPRINT") <*>
+                          argument str (metavar "EMAIL")))
+                        (fullDesc <>
+                         progDesc "Trust mappings"))
+        updateCmd =
+          command "update"
+                  (info (helper <*>
+                         (update <$> url))
+                        (fullDesc <>
+                         progDesc "Update the archive"))
+        url =
           strOption (long "url" <>
                      short 'u' <>
                      metavar "URL" <>
