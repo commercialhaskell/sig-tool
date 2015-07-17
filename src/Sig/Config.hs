@@ -37,10 +37,10 @@ import System.Locale ( defaultTimeLocale )
 
 defaultSigners :: [Signer]
 defaultSigners =
-  [Signer {signerFingerprint = "9616E227"
+  [Signer {signerFingerprint = "ADD9 EB09 887A BE32 3EF7  F701 2141 7080 9616 E227"
           ,signerEmail =
              fromJust (emailAddress "chrisdone@gmail.com")}
-  ,Signer {signerFingerprint = "0D4F46E1"
+  ,Signer {signerFingerprint = "5E6C 66B2 78BD B10A A636  57FA A048 E8C0 57E8 6876"
           ,signerEmail =
              fromJust (emailAddress "michael@snoyman.com")}]
 
