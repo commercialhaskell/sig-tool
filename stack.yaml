@@ -1,6 +1,5 @@
-flags:
-  sig-tool: {}
+flags: {}
 packages:
 - '.'
 extra-deps: []
-resolver: lts-2.15
+resolver: lts-2.18
