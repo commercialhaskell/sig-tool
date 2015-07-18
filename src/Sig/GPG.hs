@@ -44,14 +44,6 @@ sign path =
         then throwM (GPGSignException (out ++ "\n" ++ err))
         else return (Signature (C.pack out))
 
-keyExists :: forall (m :: * -> *).
-             (Monad m,MonadIO m,MonadThrow m)
-          => Signer -> m Bool
-keyExists (Signer fingerprint _email) =
-  fullFingerprint fingerprint >>
-  -- FIXME this Bool is pointless because of exceptions
-  return True
-
 verifyPackage :: forall (m :: * -> *).
                   (Monad m,MonadIO m,MonadThrow m)
                => Archive -> PackageIdentifier -> FilePath -> m ()

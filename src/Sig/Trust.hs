@@ -13,31 +13,18 @@ Portability : POSIX
 module Sig.Trust where
 
 import BasePrelude
-import Sig.Config ( readConfig, addSigner )
-import Sig.GPG ( keyExists )
+import Sig.Config
+import Sig.GPG
 import Sig.Types
-    ( SigException(GPGKeyMissingException, InvalidEmailException),
-      FingerprintSample(FingerprintSample),
-      Signer(Signer) )
-import Text.Email.Validate ( validate )
+import Text.Email.Validate (validate)
 
 trust :: String -> String -> IO ()
 trust fingerprint email =
   do cfg <- readConfig
-     -- FIXME: always throws an exception :|
-     -- case eitherDecode (fromString fingerprint) of
-     --   Left e ->
-     --     throwIO (InvalidFingerprintException e)
-     --   Right fingerprint' ->
      case validate (fromString email) of
        Left e ->
          throwIO (InvalidEmailException e)
        Right email' ->
-         do let signer =
-                  Signer (FingerprintSample (fromString fingerprint)) email'
-            exists <- keyExists signer
-            unless exists
-                   (throwIO (GPGKeyMissingException
-                               ("could not find key with fingerprint " <>
-                                fingerprint)))
-            addSigner cfg signer
+         do fullFP <-
+              fullFingerprint (FingerprintSample (fromString fingerprint))
+            addSigner cfg (Signer fullFP email')
