@@ -1,4 +1,6 @@
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
 {-|
@@ -13,103 +15,267 @@ Portability : POSIX
 
 module Sig.GPG where
 
-import BasePrelude
-import qualified Data.ByteString.Char8 as C ( unpack, pack )
-import Data.Map.Strict as M ( lookup, Map, toList )
-import qualified Data.Set as S ( toList, empty )
-import Data.Text ( Text )
-import qualified Data.Text as T ( unpack, pack )
-import Distribution.Package
-    ( PackageName(PackageName), PackageIdentifier(..), packageName )
-import Sig.Defaults ( mappingsDir )
-import Sig.Types
-    ( SigException(GPGKeyMissingException, GPGNoSignatureException,
-                   GPGSignException, GPGVerifyException),
-      Config(Config),
-      FingerprintSample(FingerprintSample),
-      Signer(Signer),
-      Mapping,
-      Signature(..),
-      Archive(archiveSignatures) )
-import System.Directory ( doesFileExist )
-import System.FilePath ( (</>) )
-import System.Process ( readProcessWithExitCode )
+import           BasePrelude
+import           Control.Monad.Catch (MonadThrow, throwM)
+import           Control.Monad.IO.Class (MonadIO, liftIO)
+import qualified Data.ByteString.Char8 as C
+import           Data.Map (Map)
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S
+import           Data.Text (Text)
+import qualified Data.Text as T
+import           Distribution.Package (PackageName(..), PackageIdentifier(..), packageName)
+import           Sig.Defaults
+import           Sig.Types
+import           System.Directory (doesFileExist)
+import           System.FilePath ((</>))
+import           System.Process (readProcessWithExitCode)
 
-sign :: FilePath -> IO Signature
+sign :: forall (m :: * -> *).
+        (Monad m,MonadIO m,MonadThrow m)
+     => FilePath -> m Signature
 sign path =
   do (code,out,err) <-
-       readProcessWithExitCode "gpg"
-                               ["--output","-","--use-agent","--detach-sig","--armor",path]
-                               mempty
+       liftIO (readProcessWithExitCode
+                 "gpg"
+                 ["--output","-","--use-agent","--detach-sig","--armor",path]
+                 mempty)
      if code /= ExitSuccess
-        then throwIO (GPGSignException err)
+        then throwM (GPGSignException (out ++ "\n" ++ err))
         else return (Signature (C.pack out))
 
-keyExists :: Signer -> IO Bool
-keyExists (Signer (FingerprintSample fingerprint) _email) =
-  do (code,_out,err) <-
-       readProcessWithExitCode "gpg"
-                               ["--fingerprint",T.unpack fingerprint]
-                               mempty
-     -- TODO verify fingerprint only brings back one key
-     -- TODO verify email matches fingerprint
-     if code /= ExitSuccess
-        then throwIO (GPGKeyMissingException err)
-        else return True
+keyExists :: forall (m :: * -> *).
+             (Monad m,MonadIO m,MonadThrow m)
+          => Signer -> m Bool
+keyExists (Signer fingerprint _email) =
+  fullFingerprint fingerprint >>
+  -- FIXME this Bool is pointless because of exceptions
+  return True
 
-verifyPackage :: Archive -> PackageIdentifier -> FilePath -> IO ()
+verifyPackage :: forall (m :: * -> *).
+                  (Monad m,MonadIO m,MonadThrow m)
+               => Archive -> PackageIdentifier -> FilePath -> m ()
 verifyPackage arch pkg@PackageIdentifier{..} path =
   let (PackageName name) = packageName pkg
   in case M.lookup pkg (archiveSignatures arch) of
        Nothing ->
-         throwIO (GPGNoSignatureException ("no signature for package " <> name))
+         throwM (GPGNoSignatureException ("no signature for package " <> name))
        Just sigs
          | S.empty == sigs ->
-           throwIO (GPGNoSignatureException ("no signature for package " <> name))
+           throwM (GPGNoSignatureException ("no signature for package " <> name))
        Just sigs ->
-         forM_ (S.toList sigs)
-               (\(Signature s) ->
-                  do (code,_out,err) <-
-                       readProcessWithExitCode "gpg"
-                                               ["--verify","-",path]
-                                               (C.unpack s)
-                     when (code /= ExitSuccess)
-                          (throwIO (GPGVerifyException err)))
+         forM_ (S.toList sigs) (`verifyFile` path)
 
-verifyMappings :: Config
-               -> Map Text Mapping
-               -> FilePath
-               -> IO ()
+-- TODO always remove spaces from any FingerprintSample
+
+verifyMappings :: forall (m :: * -> *).
+                  (Monad m,MonadIO m,MonadThrow m)
+               => Config -> Map Text Mapping -> FilePath -> m ()
 verifyMappings (Config signers) mappings dir =
   mapM_ (\(k,_v) ->
            verifyMapping (dir </> mappingsDir </> T.unpack k <> ".yaml"))
         (M.toList mappings)
-  where verifyMapping filepath =
-          do let signaturePath = filepath <> ".asc"
-             exists <- doesFileExist signaturePath
-             unless exists (throwIO (GPGNoSignatureException signaturePath))
-             (code,_out,err) <-
-               readProcessWithExitCode "gpg"
-                                       ["--verify",signaturePath,filepath]
-                                       []
-             if code /= ExitSuccess
-                then throwIO (GPGVerifyException err)
-                else do let fingerprint = fingerprintFromVerifyOutput err
-                        unless (any (\(Signer f _) -> f == fingerprint) signers)
-                               (throwIO (GPGNoSignatureException
-                                           ("no verifiable signature for " <>
-                                            filepath)))
+  where verifyMapping filePath =
+          do let signaturePath = filePath <> ".asc"
+             exists <-
+               liftIO (doesFileExist signaturePath)
+             unless exists
+                    (throwM (GPGNoSignatureException
+                               ("signature file " <> signaturePath <>
+                                " is missing")))
+             fingerprint <-
+               verifyFile' signaturePath filePath >>=
+               fullFingerprint
+             unless (any (\(Signer f _) -> f == fingerprint) signers)
+                    (throwM (GPGNoSignatureException
+                               ("no verifiable signature for " <> filePath)))
 
-fingerprintFromVerify :: Signature -> FilePath -> IO FingerprintSample
-fingerprintFromVerify (Signature signature) path =
-  do (code,_out,err) <-
-       readProcessWithExitCode "gpg"
-                               ["--verify","-",path]
-                               (C.unpack signature)
+verifyFile :: forall (m :: * -> *).
+              (Monad m,MonadIO m,MonadThrow m)
+            => Signature -> FilePath -> m FingerprintSample
+verifyFile (Signature signature) path =
+  verifyFileWithProcess
+    (readProcessWithExitCode "gpg"
+                             ["--verify","-",path]
+                             (C.unpack signature))
+
+verifyFile' :: forall (m :: * -> *).
+                (Monad m,MonadIO m,MonadThrow m)
+             => FilePath -> FilePath -> m FingerprintSample
+verifyFile' signaturePath filePath =
+  verifyFileWithProcess
+    (readProcessWithExitCode "gpg"
+                             ["--verify",signaturePath,filePath]
+                             [])
+
+verifyFileWithProcess :: forall (m :: * -> *) p.
+                         (Monad m,MonadIO m,MonadThrow m)
+                      => IO (ExitCode,String,String) -> m FingerprintSample
+verifyFileWithProcess process =
+  do (code,out,err) <- liftIO process
      if code /= ExitSuccess
-        then throwIO (GPGVerifyException err)
-        else return (fingerprintFromVerifyOutput err)
+        then throwM (GPGVerifyException (out ++ "\n" ++ err))
+        else maybe (throwM (GPGFingerprintException
+                              ("unable to extract short fingerprint from output\n: " <>
+                               out)))
+                   return
+                   (let hasFingerprint =
+                          (==) ["gpg:","Signature","made"] .
+                          take 3
+                        fingerprint = T.pack . last
+                    in FingerprintSample . fingerprint <$>
+                       find hasFingerprint (map words (lines err)))
 
-fingerprintFromVerifyOutput :: String -> FingerprintSample
-fingerprintFromVerifyOutput =
-  FingerprintSample . T.pack . last . words . head . lines
+fullFingerprint :: forall (m :: * -> *).
+                   (Monad m,MonadIO m,MonadThrow m)
+                => FingerprintSample -> m FingerprintSample
+fullFingerprint (FingerprintSample fp) =
+  do (code,out,err) <-
+       liftIO (readProcessWithExitCode "gpg"
+                                       ["--fingerprint",T.unpack fp]
+                                       [])
+     if code /= ExitSuccess
+        then throwM (GPGFingerprintException (out ++ "\n" ++ err))
+        else maybe (throwM (GPGFingerprintException
+                              ("unable to extract full fingerprint from output:\n " <>
+                               out)))
+                   return
+                   (let hasFingerprint =
+                          (==) ["Key","fingerprint","="] .
+                          take 3
+                        fingerprint =
+                          T.pack .
+                          concat .
+                          drop 3
+                    in FingerprintSample . fingerprint <$>
+                       find hasFingerprint (map words (lines out)))
+
+-- verifyFileT :: forall (m :: * -> *).
+--                (Monad m,MonadIO m)
+--             => Signature -> FilePath -> MaybeT m FingerprintSample
+-- verifyFileT (Signature signature) path =
+--   verifyFileWithProcessT
+--     (readProcessWithExitCode "gpg"
+--                              ["--verify","-",path]
+--                              (C.unpack signature))
+
+-- verifyFileT' :: forall (m :: * -> *).
+--                 (Monad m,MonadIO m)
+--              => FilePath -> FilePath -> MaybeT m FingerprintSample
+-- verifyFileT' signaturePath filePath =
+--   verifyFileWithProcessT
+--     (readProcessWithExitCode "gpg"
+--                              ["--verify",signaturePath,filePath]
+--                              [])
+
+-- verifyFileWithProcessT :: forall (m :: * -> *) p.
+--                           (Monad m,MonadIO m)
+--                        => IO (ExitCode,String,String)
+--                        -> MaybeT m FingerprintSample
+-- verifyFileWithProcessT process =
+--   do (code,_out,err) <- liftIO process
+--      if code /= ExitSuccess
+--         then fail err
+--         else maybe (fail err)
+--                    return
+--                    (let hasFingerprint =
+--                           (==) ["gpg:","Signature","made"] .
+--                           take 3
+--                         fingerprint = T.pack . last
+--                     in FingerprintSample . fingerprint <$>
+--                        find hasFingerprint (map words (lines err)))
+
+-- shortFingerprintToLongT :: forall (m :: * -> *).
+--                            (Monad m,MonadIO m)
+--                         => FingerprintSample -> MaybeT m FingerprintSample
+-- shortFingerprintToLongT (FingerprintSample fp) =
+--   do (code,_out,err) <-
+--        liftIO (readProcessWithExitCode "gpg"
+--                                        ["--fingerprint",T.unpack fp]
+--                                        [])
+--      if code /= ExitSuccess
+--         then fail err
+--         else maybe (fail err)
+--                    return
+--                    (let hasFingerprint =
+--                           (==) ["Key","fingerprint","="] .
+--                           take 3
+--                         fingerprint =
+--                           T.pack .
+--                           concat .
+--                           drop 3
+--                     in FingerprintSample . fingerprint <$>
+--                        find hasFingerprint (map words (lines err)))
+
+-- shortFingerprintFromVerify :: Signature -> FilePath -> IO (Maybe FingerprintSample)
+-- shortFingerprintFromVerify (Signature signature) path =
+--   do (code,_out,err) <-
+--        readProcessWithExitCode "gpg"
+--                                ["--verify","-",path]
+--                                (C.unpack signature)
+--      if code /= ExitSuccess
+--         then throwIO (GPGVerifyException err)
+--         else return (shortFingerprintFromVerifyOutput err)
+
+-- shortFingerprintFromVerify' :: FilePath -> FilePath -> IO (Maybe FingerprintSample)
+-- shortFingerprintFromVerify' signaturePath filePath =
+--   do (code,_out,err) <-
+--        readProcessWithExitCode "gpg"
+--                                ["--verify",signaturePath,filePath]
+--                                []
+--      if code /= ExitSuccess
+--         then throwIO (GPGVerifyException err)
+--         else return (shortFingerprintFromVerifyOutput err)
+
+-- longFingerprintFromShort :: FingerprintSample -> IO (Maybe FingerprintSample)
+-- longFingerprintFromShort (FingerprintSample fp) =
+--   do (code,_out,err) <-
+--        readProcessWithExitCode "gpg"
+--                                ["--fingerprint",T.unpack fp]
+--                                []
+--      if code /= ExitSuccess
+--         then throwIO (GPGFingerprintException err)
+--         else return (shortFingerprintFromVerifyOutput err)
+
+-- {-| Find the short gpg signature from verify output.
+-- Typical successful verify looks like the following:
+-- @
+-- gpg: assuming signed data in `../sig-archive/mappings/fpco.yaml'
+-- gpg: Signature made Fri 17 Jul 2015 11:45:35 AM HST using RSA key ID 44A52A60
+-- gpg: Good signature from "Tim Dysinger <tim@dysinger.net>"
+-- gpg:                 aka "Tim Dysinger <tim@dysinger.org>"
+-- gpg:                 aka "Tim Dysinger <dysinger@gmail.com>"
+-- @
+-- -}
+-- shortFingerprintFromVerifyOutput :: String -> Maybe FingerprintSample
+-- shortFingerprintFromVerifyOutput output =
+--   let hasFingerprint =
+--         (==) ["gpg:","Signature","made"] .
+--         take 3
+--       words' = map words . lines
+--   in FingerprintSample . T.pack . last <$>
+--      find hasFingerprint (words' output)
+
+-- {-| Find the long gpg signature given a fingerprint.
+-- Typical fingerprint output looks like the following:
+-- @
+-- pub   4096R/44A52A60 2010-11-04 [expires: 2015-11-03]
+--       Key fingerprint = 8C69 4F5B 6941 3F16 736F  E055 A9E6 D147 44A5 2A60
+-- uid                  Tim Dysinger <tim@dysinger.net>
+-- uid                  Tim Dysinger <tim@dysinger.org>
+-- uid                  Tim Dysinger <dysinger@gmail.com>
+-- sub   4096R/XXXXXXXX 2010-11-04 [expires: 2015-11-03]
+-- @
+-- -}
+-- longFingerprintFromFingerprintOutput :: String -> Maybe FingerprintSample
+-- longFingerprintFromFingerprintOutput output =
+--   let words' = map words . lines
+--       hasFingerprint =
+--         (==) ["Key","fingerprint","="] .
+--         take 3
+--       fingerprint =
+--         T.pack .
+--         concat .
+--         drop 3
+--   in FingerprintSample . fingerprint <$>
+--      find hasFingerprint (words' output)

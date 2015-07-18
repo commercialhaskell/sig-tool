@@ -24,24 +24,23 @@ module Sig.Types
   ,SigException(..))
   where
 
-import Control.Exception ( Exception )
-import Data.Aeson
-    ( Value(String), ToJSON(..), FromJSON(..), object, (.=), (.:) )
-import Data.ByteString ( ByteString )
-import qualified Data.ByteString as SB ( take, length )
-import Data.Char ( isDigit, isAlpha, isSpace )
-import Data.Map.Strict ( Map )
-import qualified Data.Map.Strict as M ( fromList )
-import Data.Set ( Set )
-import qualified Data.Set as S ( map )
-import Data.String ( IsString(..) )
-import Data.Text ( Text )
-import qualified Data.Text as T ( unpack, pack, all )
-import qualified Data.Text.Encoding as T ( encodeUtf8, decodeUtf8 )
-import Data.Typeable ( Typeable )
-import Distribution.Package ( PackageName, PackageIdentifier )
-import Sig.Cabal.Parse ( parsePackageName )
-import Text.Email.Validate ( EmailAddress, validate, toByteString )
+import           Control.Exception (Exception)
+import           Data.Aeson (Value(String), ToJSON(..), FromJSON(..), object, (.=), (.:))
+import           Data.ByteString ( ByteString )
+import qualified Data.ByteString as SB
+import           Data.Char (isDigit, isAlpha, isSpace)
+import           Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
+import           Data.Set ( Set )
+import qualified Data.Set as S
+import           Data.String (IsString(..))
+import           Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import           Data.Typeable (Typeable)
+import           Distribution.Package (PackageName, PackageIdentifier)
+import           Sig.Cabal.Parse (parsePackageName)
+import           Text.Email.Validate (EmailAddress, validate, toByteString)
 
 -- | A signature archive.
 data Archive =
@@ -113,10 +112,12 @@ newtype FingerprintSample =
 instance FromJSON FingerprintSample where
   parseJSON j =
     do s <- parseJSON j
-       if T.all (\c -> isAlpha c || isDigit c || isSpace c) s
-          then return (FingerprintSample s)
-          else fail ("Expected finger print sample, but got: " ++
-                     T.unpack s)
+       let withoutSpaces =
+             T.filter (not . isSpace) s
+       if T.null withoutSpaces ||
+          T.all (\c -> isAlpha c || isDigit c || isSpace c) withoutSpaces
+          then return (FingerprintSample withoutSpaces)
+          else fail ("Expected finger print, but got: " ++ T.unpack s)
 
 instance ToJSON FingerprintSample where
   toJSON (FingerprintSample txt) = String txt
@@ -166,6 +167,7 @@ data SigException
   | CabalInstallException { exMsg :: String }
   | CabalPackageListException { exMsg :: String }
   | ConfigParseException { exMsg :: String }
+  | GPGFingerprintException { exMsg :: String }
   | GPGKeyMissingException { exMsg :: String }
   | GPGNoSignatureException { exMsg :: String }
   | GPGSignException { exMsg :: String }

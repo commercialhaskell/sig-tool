@@ -1,10 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 {-|
 Module      : Sig.Sign
@@ -42,7 +40,7 @@ import Sig.Cabal
       packagesFromIndex,
       getPackageTarballPath )
 import Sig.Doc ( putHeader, putPkgOK )
-import qualified Sig.GPG as GPG ( sign, fingerprintFromVerify )
+import qualified Sig.GPG as GPG ( fullFingerprint, sign, verifyFile )
 import Sig.Hackage ( packagesForMaintainer )
 import Sig.Types
     ( SigException(GPGSignException),
@@ -107,7 +105,8 @@ signPackage url pkg filePath =
      let (PackageName name) = pkgName pkg
          version = showVersion (pkgVersion pkg)
      fingerprint <-
-       GPG.fingerprintFromVerify sig filePath
+       GPG.verifyFile sig filePath >>=
+       GPG.fullFingerprint
      req <-
        parseUrl (url <> "/upload/signature/" <> name <> "/" <> version <> "/" <>
                  T.unpack (fingerprintSample fingerprint))
