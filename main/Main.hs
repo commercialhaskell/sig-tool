@@ -48,15 +48,14 @@ import Sig.Update ( update )
 import System.IO ( hPutStr, stderr )
 
 -- | Main entry point.
-main :: IO ExitCode
+main :: IO ()
 main =
   do args <- getArgs
      let (optParseArgs,extraArgs) =
            let (l,r) = span ("--" /=) args
            in (l,dropWhile ("--" ==) r)
      withArgs optParseArgs
-              (catch (do join (execOptParse extraArgs)
-                         exitSuccess)
+              (catch (join (execOptParse extraArgs))
                      (\e ->
                         do hPutStr stderr
                                    ("ERROR: " <>
