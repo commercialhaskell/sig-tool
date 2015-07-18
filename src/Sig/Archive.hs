@@ -47,8 +47,8 @@ readArchive dir =
             mappingFilepaths
      signatures <-
        readSignatures (dir </> signaturesDir)
-     return (Archive {archiveMappings = M.fromList mappings
-                     ,archiveSignatures = signatures})
+     return Archive {archiveMappings = M.fromList mappings
+                    ,archiveSignatures = signatures}
 
 -- | Read all signatures from the directory.
 readSignatures :: FilePath
@@ -77,8 +77,8 @@ readSignatures dir =
                                                signatures
                                    fmap (PackageIdentifier name ver,)
                                         (forM (M.elems signatures')
-                                              (\fp ->
-                                                 fmap Signature (S.readFile fp))))
+                                              (fmap Signature .
+                                               S.readFile)))
                              versions
                       return (map (second S.fromList) versionSignatures))
                 packageNames)

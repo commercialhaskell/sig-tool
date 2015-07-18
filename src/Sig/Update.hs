@@ -44,14 +44,13 @@ update url =
          archivePath = configPath </> archiveDir
      request <-
        parseUrl (url <> "/download/archive")
-     catch
-       (withManager
-          (\mgr ->
-             do res <- http request mgr
-                (responseBody res) C.$$+-
-                  sinkFile tempFile))
-       (\e ->
-          throwIO (SigServiceException (show (e :: SomeException))))
+     catch (withManager
+              (\mgr ->
+                 do res <- http request mgr
+                    (responseBody res) C.$$+-
+                      sinkFile tempFile))
+           (\e ->
+              throwIO (SigServiceException (show (e :: SomeException))))
      oldExists <- doesDirectoryExist archivePath
      when oldExists
           (do time <- getCurrentTime
@@ -64,6 +63,5 @@ update url =
        readProcessWithExitCode "tar"
                                ["xf",tempFile,"-C",configPath]
                                mempty
-     if code /= ExitSuccess
-        then throwIO (ArchiveUpdateException err)
-        else return ()
+     unless (code == ExitSuccess)
+            (throwIO (ArchiveUpdateException err))

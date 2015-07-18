@@ -73,12 +73,11 @@ verifyPackage arch pkg@PackageIdentifier{..} path =
                        readProcessWithExitCode "gpg"
                                                ["--verify","-",path]
                                                (C.unpack s)
-                     if code /= ExitSuccess
-                        then throwIO (GPGVerifyException err)
-                        else return ())
+                     when (code /= ExitSuccess)
+                          (throwIO (GPGVerifyException err)))
 
 verifyMappings :: Config
-               -> (Map Text Mapping)
+               -> Map Text Mapping
                -> FilePath
                -> IO ()
 verifyMappings (Config signers) mappings dir =
@@ -88,8 +87,7 @@ verifyMappings (Config signers) mappings dir =
   where verifyMapping filepath =
           do let signaturePath = filepath <> ".asc"
              exists <- doesFileExist signaturePath
-             when (not exists)
-                  (throwIO (GPGNoSignatureException signaturePath))
+             unless exists (throwIO (GPGNoSignatureException signaturePath))
              (code,_out,err) <-
                readProcessWithExitCode "gpg"
                                        ["--verify",signaturePath,filepath]
@@ -97,9 +95,10 @@ verifyMappings (Config signers) mappings dir =
              if code /= ExitSuccess
                 then throwIO (GPGVerifyException err)
                 else do let fingerprint = fingerprintFromVerifyOutput err
-                        when (not (any (\(Signer f _) -> f == fingerprint) signers))
-                             (throwIO (GPGNoSignatureException
-                                         ("no verifiable signature for " <> filepath)))
+                        unless (any (\(Signer f _) -> f == fingerprint) signers)
+                               (throwIO (GPGNoSignatureException
+                                           ("no verifiable signature for " <>
+                                            filepath)))
 
 fingerprintFromVerify :: Signature -> FilePath -> IO FingerprintSample
 fingerprintFromVerify (Signature signature) path =
@@ -113,5 +112,4 @@ fingerprintFromVerify (Signature signature) path =
 
 fingerprintFromVerifyOutput :: String -> FingerprintSample
 fingerprintFromVerifyOutput =
-  FingerprintSample .
-  (T.pack . head . reverse . words . head . lines)
+  FingerprintSample . T.pack . last . words . head . lines

@@ -29,15 +29,15 @@ trust fingerprint email =
      --   Left e ->
      --     throwIO (InvalidFingerprintException e)
      --   Right fingerprint' ->
-     (case validate (fromString email) of
-        Left e ->
-          throwIO (InvalidEmailException e)
-        Right email' ->
-          do let signer =
-                   Signer (FingerprintSample (fromString fingerprint)) email'
-             exists <- keyExists signer
-             when (not exists)
-                  (throwIO (GPGKeyMissingException
-                              ("could not find key with fingerprint " <>
-                               fingerprint)))
-             addSigner cfg signer)
+     case validate (fromString email) of
+       Left e ->
+         throwIO (InvalidEmailException e)
+       Right email' ->
+         do let signer =
+                  Signer (FingerprintSample (fromString fingerprint)) email'
+            exists <- keyExists signer
+            unless exists
+                   (throwIO (GPGKeyMissingException
+                               ("could not find key with fingerprint " <>
+                                fingerprint)))
+            addSigner cfg signer

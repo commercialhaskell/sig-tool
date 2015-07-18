@@ -55,11 +55,14 @@ main =
            let (l,r) = span ("--" /=) args
            in (l,dropWhile ("--" ==) r)
      withArgs optParseArgs
-              (do catch (do join (execOptParse extraArgs)
-                            exitSuccess)
-                        (\e ->
-                           do hPutStr stderr ("ERROR: " <> exMsg e <> "\n")
-                              exitFailure))
+              (catch (do join (execOptParse extraArgs)
+                         exitSuccess)
+                     (\e ->
+                        do hPutStr stderr
+                                   ("ERROR: " <>
+                                    show (e :: SomeException) <>
+                                    "\n")
+                           exitFailure))
 
 execOptParse :: [String] -> IO (IO ())
 execOptParse extraArgs =

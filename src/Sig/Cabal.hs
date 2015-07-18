@@ -71,7 +71,7 @@ cabalInstallDryRun opts pkg =
          mempty
      if code /= ExitSuccess
         then throwIO (CabalPackageListException err)
-        else return (if (head . reverse . lines $ out) ==
+        else return (if (last . lines $ out) ==
                         "Use --reinstall if you want to reinstall anyway."
                         then empty
                         else stdoutToPackageIdentifiers out)
@@ -108,9 +108,8 @@ cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) =
           opts ++
           [pkg])
          mempty
-     if code /= ExitSuccess
-        then throwIO (CabalFetchException err)
-        else return ()
+     unless (code == ExitSuccess)
+            (throwIO (CabalFetchException err))
 
 cabalInstall :: [String] -> String -> IO ()
 cabalInstall opts pkg =
@@ -121,9 +120,8 @@ cabalInstall opts pkg =
          (["install"] ++
           opts ++
           [pkg])
-     if code /= ExitSuccess
-        then throwIO (CabalInstallException "unable to cabal-install")
-        else return ()
+     unless (code == ExitSuccess)
+            (throwIO (CabalInstallException "unable to cabal-install"))
 
 cabalFilePackageId :: FilePath -> IO PackageIdentifier
 cabalFilePackageId fp =
@@ -137,10 +135,10 @@ packagesFromIndex =
   do indexPath <- getPackageIndexPath
      indexExists <-
        liftIO (doesFileExist indexPath)
-     when (not indexExists)
-          (throwM (CabalIndexException
-                     ("Cabal index \"" <> indexPath <>
-                      "\" is missing. Please run `cabal update` first.")))
+     unless indexExists
+            (throwM (CabalIndexException
+                       ("Cabal index \"" <> indexPath <>
+                        "\" is missing. Please run `cabal update` first.")))
      filePathsFromTarball [] .
        Tar.read =<<
        liftIO . BL.readFile =<< getPackageIndexPath
@@ -152,9 +150,8 @@ packagesFromIndex =
         filePathsFromTarball pkgs (Tar.Next entry es) =
           case Tar.entryContent entry of
             Tar.NormalFile _ _
-              | ".cabal" `isSuffixOf`
-                  (Tar.entryPath entry) ->
-                case (splitOn "/" (Tar.entryPath entry)) of
+              | ".cabal" `isSuffixOf` Tar.entryPath entry ->
+                case splitOn "/" (Tar.entryPath entry) of
                   [] ->
                     filePathsFromTarball pkgs es
                   [_] ->

@@ -38,7 +38,7 @@ packagesForMaintainer uname =
        withManager
          (httpLbs (req {requestHeaders =
                           [("Accept","application/json")]}))
-     case ((fmap packageNamesForUser <$> eitherDecode) (responseBody res)) of
+     case (fmap packageNamesForUser <$> eitherDecode) (responseBody res) of
        Left err ->
          throwM (HackageAPIException
                    ("Cloudn't retrieve packages for user " <> uname <> ": " <>
@@ -46,8 +46,8 @@ packagesForMaintainer uname =
        Right pkgs -> return pkgs
 
 packageNamesForUser :: UserDetail -> [PackageIdentifier]
-packageNamesForUser = catMaybes . map packageNameFromGroup . groups
+packageNamesForUser = mapMaybe packageNameFromGroup . groups
   where packageNameFromGroup grp =
           case filter ("" /=) (splitOn "/" grp) of
-            ("package":pkg:"maintainers":[]) -> simpleParse pkg
+            ["package",pkg,"maintainers"] -> simpleParse pkg
             _ -> Nothing
