@@ -58,8 +58,7 @@ main =
               (catch (join (execOptParse extraArgs))
                      (\e ->
                         do hPutStr stderr
-                                   ("ERROR: " <>
-                                    show (e :: SomeException) <>
+                                   (show (e :: SomeException) <>
                                     "\n")
                            exitFailure))
 
