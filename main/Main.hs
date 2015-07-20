@@ -66,8 +66,8 @@ execOptParse :: [String] -> IO (IO ())
 execOptParse extraArgs =
   execParser
     (info (helper <*>
-           subparser (checkCmd <> initCmd <> installCmd <> mappingsCmd <>
-                      signCmd <> trustCmd <> updateCmd))
+           subparser (checkCmd <> initCmd <> mappingsCmd <> signCmd <> trustCmd <>
+                      updateCmd))
           (fullDesc <>
            header ("sig " <> packageVersion <> " " <> buildDate) <>
            progDesc "Haskell Package Signing Tool"))
@@ -84,13 +84,6 @@ execOptParse extraArgs =
                          (initialize <$> url))
                         (fullDesc <>
                          progDesc "Initialize"))
-        installCmd =
-          command "install"
-                  (info (helper <*>
-                         (install extraArgs <$>
-                          argument str (metavar "PACKAGE")))
-                        (fullDesc <>
-                         progDesc "Install package"))
         mappingsCmd =
           command "mappings"
                   (info (helper <*> pure list)
