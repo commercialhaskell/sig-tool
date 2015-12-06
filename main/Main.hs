@@ -37,14 +37,8 @@ import Options.Applicative
       short,
       showDefault,
       value )
-import Sig.Check ( check )
-import Sig.Init ( initialize )
-import Sig.Install ( install )
-import Sig.List ( list )
 import Sig.Sign ( sign, signAll )
-import Sig.Trust ( trust )
 import Sig.Types ( exMsg )
-import Sig.Update ( update )
 import System.IO ( hPutStr, stderr )
 
 -- | Main entry point.
@@ -65,31 +59,11 @@ main =
 execOptParse :: [String] -> IO (IO ())
 execOptParse extraArgs =
   execParser
-    (info (helper <*>
-           subparser (checkCmd <> initCmd <> mappingsCmd <> signCmd <> trustCmd <>
-                      updateCmd))
+    (info (helper <*> subparser signCmd)
           (fullDesc <>
            header ("sig " <> packageVersion <> " " <> buildDate) <>
            progDesc "Haskell Package Signing Tool"))
-  where checkCmd =
-          command "check"
-                  (info (helper <*>
-                         (check extraArgs <$>
-                          argument str (metavar "PACKAGE")))
-                        (fullDesc <>
-                         progDesc "Check a package"))
-        initCmd =
-          command "init"
-                  (info (helper <*>
-                         (initialize <$> url))
-                        (fullDesc <>
-                         progDesc "Initialize"))
-        mappingsCmd =
-          command "mappings"
-                  (info (helper <*> pure list)
-                        (fullDesc <>
-                         progDesc "List mappings"))
-        signCmd =
+  where signCmd =
           command "sign"
                   (info (helper <*>
                          (subparser (command "sdist"
@@ -106,26 +80,13 @@ execOptParse extraArgs =
                                                     progDesc "Sign all your Hackage packages")))))
                         (fullDesc <>
                          progDesc "Sign packages"))
-        trustCmd =
-          command "trust"
-                  (info (helper <*>
-                         (trust <$>
-                          argument str (metavar "FINGERPRINT") <*>
-                          argument str (metavar "EMAIL")))
-                        (fullDesc <>
-                         progDesc "Trust mappings"))
-        updateCmd =
-          command "update"
-                  (info (helper <*>
-                         (update <$> url))
-                        (fullDesc <>
-                         progDesc "Update the archive"))
         url =
           strOption (long "url" <>
                      short 'u' <>
                      metavar "URL" <>
                      showDefault <>
                      value "https://sig.commercialhaskell.org")
+
 packageVersion :: String
 packageVersion =
   $(packageVariable (pkgVersion . package))

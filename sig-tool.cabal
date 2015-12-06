@@ -22,21 +22,13 @@ source-repository head
 library
   hs-source-dirs:    src/
   exposed-modules:   Sig
-                     Sig.Archive
                      Sig.Cabal
                      Sig.Cabal.Parse
-                     Sig.Check
-                     Sig.Config
                      Sig.Defaults
                      Sig.Doc
                      Sig.GPG
                      Sig.Hackage
-                     Sig.Init
-                     Sig.Install
-                     Sig.List
-                     Sig.Mapping
                      Sig.Sign
-                     Sig.Trust
                      Sig.Types
                      Sig.Update
   other-modules:     System.Directory.Parse
