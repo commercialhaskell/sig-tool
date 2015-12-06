@@ -47,8 +47,8 @@ library
                    , base-prelude
                    , bytestring     >=0.10
                    , conduit
-                   , conduit-extra
                    , conduit-combinators
+                   , conduit-extra
                    , containers     >=0.5
                    , directory      >=1.2
                    , email-validate >=2.0
