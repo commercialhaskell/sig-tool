@@ -60,6 +60,7 @@ library
                    , old-locale
                    , process        >=1.2
                    , split
+                   , stack          >=0.1.10
                    , tar
                    , text           >=1.2
                    , time
