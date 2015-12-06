@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -179,7 +178,4 @@ data SigException
   | SigServiceException { exMsg :: String }
   deriving (Show,Typeable)
 
-instance Exception SigException where
-#if __GLASGOW_HASKELL__ >= 710
-  displayException = exMsg
-#endif
+instance Exception SigException
