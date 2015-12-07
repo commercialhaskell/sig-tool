@@ -77,23 +77,15 @@ cabalInstallDryRun opts pkg =
                         else stdoutToPackageIdentifiers out)
   where stdoutToPackageIdentifiers :: String -> [PackageIdentifier]
         stdoutToPackageIdentifiers =
-          map ((\(version:reverseName) ->
-                  -- TODO use the PI parser
-                  PackageIdentifier
-                    (PackageName
-                       (intercalate "-"
-                                    (reverse reverseName)))
-                    (Version {versionBranch =
-                                map read (splitOn "." version)
-                             ,versionTags = []})) . {- FIXME Deprecated: "See GHC ticket #2496" -}
-               -- if people use 'tags' then this fn won't work, I'll
-               -- have to parse smarter
-               reverse .
-               splitOn "-") .
-          map (head .
-               splitOn " ") .
-          drop 2 .
-          lines
+          map
+            (((\ (version : reverseName) ->
+                 PackageIdentifier
+                   (PackageName (intercalate "-" (reverse reverseName)))
+                   Version{versionBranch = map read (splitOn "." version),
+                           versionTags = []})
+                . reverse . splitOn "-")
+               . head . splitOn " ")
+            . drop 2 . lines
 
 cabalFetch :: [String] -> PackageIdentifier -> IO ()
 cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) =

@@ -66,18 +66,18 @@ execOptParse extraArgs =
   where signCmd =
           command "sign"
                   (info (helper <*>
-                         (subparser (command "sdist"
-                                             (info (helper <*>
-                                                    (sign <$> url <*>
-                                                     argument str (metavar "PATH")))
-                                                   (fullDesc <>
-                                                    progDesc "Sign a single sdist tarball")) <>
-                                     command "hackage"
-                                             (info (helper <*>
-                                                    (signAll <$> url <*>
-                                                     argument str (metavar "USER")))
-                                                   (fullDesc <>
-                                                    progDesc "Sign all your Hackage packages")))))
+                         subparser (command "sdist"
+                                            (info (helper <*>
+                                                   (sign <$> url <*>
+                                                    argument str (metavar "PATH")))
+                                                  (fullDesc <>
+                                                   progDesc "Sign a single sdist tarball")) <>
+                                    command "hackage"
+                                            (info (helper <*>
+                                                   (signAll <$> url <*>
+                                                    argument str (metavar "USER")))
+                                                  (fullDesc <>
+                                                   progDesc "Sign all your Hackage packages"))))
                         (fullDesc <>
                          progDesc "Sign packages"))
         url =
