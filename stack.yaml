@@ -1,6 +1,2 @@
-flags: {}
-packages:
-- '.'
-extra-deps:
-- stack-0.1.10.0
-resolver: lts-3.16
+resolver: lts-5.3
+packages: ['.']
