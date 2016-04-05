@@ -1,19 +1,19 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Sig.Hackage where
 
-import BasePrelude
 import Control.Monad.Catch (MonadThrow, throwM)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Data.Aeson (eitherDecode)
 import Data.Aeson.TH (deriveFromJSON, defaultOptions)
 import Data.List.Split (splitOn)
+import Data.Maybe (mapMaybe)
+import Data.Monoid ((<>))
 import Distribution.Package (PackageIdentifier)
 import Distribution.Text (simpleParse)
 import Network.HTTP.Conduit

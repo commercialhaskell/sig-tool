@@ -35,7 +35,6 @@ library
                    , aeson
                    , ansi-wl-pprint
                    , base
-                   , base-prelude
                    , bytestring
                    , conduit
                    , conduit-combinators

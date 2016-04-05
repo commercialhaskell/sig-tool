@@ -15,7 +15,7 @@ Portability : POSIX
 -}
 module Sig.Cabal where
 
-import BasePrelude
+import Prelude hiding ((<$>))
 import qualified Codec.Archive.Tar as Tar
        (EntryContent(NormalFile), Entry(entryContent),
         Entries(Done, Fail, Next), entryPath, read)
@@ -23,9 +23,16 @@ import Conduit
        (MonadIO(..), MonadThrow(..), MonadBaseControl, (=$), ($$),
         runResourceT, sourceFile, sinkList, linesUnboundedC, decodeUtf8C,
         concatMapC)
+import Control.Exception (throwIO)
+import Control.Monad (unless)
 import qualified Data.ByteString.Lazy as BL (readFile)
+import Data.List (intercalate, isSuffixOf, stripPrefix)
 import Data.List.Split (splitOn)
+import Data.Maybe (catMaybes)
+import Data.Monoid ((<>))
+import Data.String (fromString)
 import qualified Data.Text as T (unpack)
+import Data.Version (Version(..))
 import Distribution.Package
        (PackageName(PackageName), PackageIdentifier(PackageIdentifier),
         pkgName, pkgVersion)
@@ -40,6 +47,7 @@ import Sig.Types
        (SigException(CabalFetchException, CabalInstallException,
                      CabalIndexException, CabalPackageListException))
 import System.Directory (doesFileExist, getAppUserDataDirectory)
+import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
 import System.Process
        (waitForProcess, spawnProcess, readProcessWithExitCode)
@@ -60,7 +68,7 @@ cabalInstallDryRun opts pkg = do
         else return
                  (if (last . lines $ out) ==
                      "Use --reinstall if you want to reinstall anyway."
-                      then empty
+                      then []
                       else stdoutToPackageIdentifiers out)
   where
     stdoutToPackageIdentifiers :: String -> [PackageIdentifier]

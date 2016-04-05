@@ -1,8 +1,8 @@
 {-# LANGUAGE ExtendedDefaultRules #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -18,11 +18,12 @@ Portability : POSIX
 
 module Sig.Doc (ToDoc(..), putToDoc, putHeader, putPkgOK) where
 
-import BasePrelude hiding ((<>), (<$>), (<+>), empty)
+import Prelude hiding ((<$>))
 import Control.Monad.Catch ()
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Control ()
 import qualified Data.ByteString.Char8 as C (unpack)
+import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map.Strict as M (toList)
 import Data.Set (Set)
@@ -39,6 +40,7 @@ import Text.Email.Validate (EmailAddress, toByteString)
 import Text.PrettyPrint.ANSI.Leijen
        (Doc, vsep, text, putDoc, linebreak, indent, hang, fill, empty,
         (<>), (<+>), (<$>))
+import Data.Version (versionTags, versionBranch)
 
 default (Text)
 

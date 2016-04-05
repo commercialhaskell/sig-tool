@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 
 {-|
 Module      : Sig.Update
@@ -13,9 +12,17 @@ Portability : POSIX
 
 module Sig.Update where
 
-import BasePrelude
+#if MIN_VERSION_time(1,5,0)
+import Data.Time (defaultTimeLocale)
+#else
+import System.Locale (defaultTimeLocale)
+#endif
+
+import Control.Exception (catch, throwIO, SomeException)
+import Control.Monad (unless, when)
 import qualified Data.Conduit as C (($$+-))
 import Data.Conduit.Binary (sinkFile)
+import Data.Monoid ((<>))
 import Data.Time (formatTime, getCurrentTime)
 import Network.HTTP.Conduit
        (Response(responseBody), withManager, http, parseUrl)
@@ -25,14 +32,9 @@ import Sig.Types
 import System.Directory
        (renameDirectory, getTemporaryDirectory, getHomeDirectory,
         doesDirectoryExist)
+import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
 import System.Process (readProcessWithExitCode)
-
-#if MIN_VERSION_time(1,5,0)
-import Data.Time (defaultTimeLocale)
-#else
-import System.Locale (defaultTimeLocale)
-#endif
 
 update :: String -> IO ()
 update url = do

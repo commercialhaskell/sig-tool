@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
@@ -16,13 +15,19 @@ Portability : POSIX
 
 module Sig.Sign (sign, signAll) where
 
-import BasePrelude
+import Control.Applicative ((<$>))
+import Control.Exception (throwIO)
+import Control.Monad (when)
 import Control.Monad.Catch (MonadThrow)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Control (MonadBaseControl)
+import Data.Foldable (forM_)
+import Data.List (isSuffixOf)
+import Data.Monoid ((<>))
 import qualified Data.Text as T (unpack)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
+import Data.Version (showVersion)
 import Distribution.Package
        (PackageName(PackageName), PackageIdentifier(pkgName, pkgVersion))
 import Network.HTTP.Conduit

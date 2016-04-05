@@ -1,5 +1,4 @@
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -15,12 +14,15 @@ Portability : POSIX
 
 module Sig.GPG where
 
-import BasePrelude
+import Control.Monad (unless)
 import Control.Monad.Catch (MonadThrow, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.ByteString.Char8 as C
+import Data.Foldable (forM_)
+import Data.List (find)
 import Data.Map (Map)
 import qualified Data.Map.Strict as M
+import Data.Monoid ((<>))
 import qualified Data.Set as S
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -29,6 +31,7 @@ import Distribution.Package
 import Sig.Defaults
 import Sig.Types
 import System.Directory (doesFileExist)
+import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
 import System.Process (readProcessWithExitCode)
 
