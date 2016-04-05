@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
@@ -15,7 +16,12 @@ Portability : POSIX
 -}
 module Sig.Cabal where
 
+#if __GLASGOW_HASKELL__ < 710
+import Prelude
+#else
 import Prelude hiding ((<$>))
+#endif
+
 import qualified Codec.Archive.Tar as Tar
        (EntryContent(NormalFile), Entry(entryContent),
         Entries(Done, Fail, Next), entryPath, read)
