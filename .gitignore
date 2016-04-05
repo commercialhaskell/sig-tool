@@ -13,3 +13,4 @@ cabal-dev/
 cabal.sandbox.config
 dist/
 tags
+/.dir-locals.el
