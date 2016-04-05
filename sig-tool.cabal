@@ -21,8 +21,7 @@ source-repository head
 
 library
   hs-source-dirs:    src/
-  exposed-modules:   Sig
-                     Sig.Cabal
+  exposed-modules:   Sig.Cabal
                      Sig.Cabal.Parse
                      Sig.Defaults
                      Sig.Doc
@@ -42,7 +41,6 @@ library
                    , conduit-combinators
                    , conduit-extra
                    , containers
-                   , directory
                    , directory
                    , email-validate
                    , email-validate
