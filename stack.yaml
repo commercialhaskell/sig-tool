@@ -1,2 +1,4 @@
 resolver: lts-5.3
 packages: ['.']
+ghc-options:
+  "*": -Wall

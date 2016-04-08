@@ -1,7 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Sig.Hackage where
@@ -29,8 +27,7 @@ data UserDetail = UserDetail
 $(deriveFromJSON defaultOptions ''UserDetail)
 
 packagesForMaintainer
-    :: forall (m :: * -> *).
-       (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
     => String -> m [PackageIdentifier]
 packagesForMaintainer uname = do
     req <- parseUrl ("https://hackage.haskell.org/user/" <> uname)

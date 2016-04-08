@@ -1,8 +1,5 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ViewPatterns #-}
 
 {-|
@@ -111,8 +108,7 @@ cabalFilePackageId fp =
     pure . package . packageDescription =<< readPackageDescription silent fp
 
 packagesFromIndex
-    :: forall (m :: * -> *).
-       (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
     => m [PackageIdentifier]
 packagesFromIndex = do
     indexPath <- getPackageIndexPath
@@ -145,16 +141,14 @@ packagesFromIndex = do
             _ -> filePathsFromTarball pkgs es
 
 getPackageIndexPath
-    :: forall (m :: * -> *).
-       (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
     => m FilePath
 getPackageIndexPath = do
     cabalCacheDir <- getCabalCacheDir
     return (cabalCacheDir </> "hackage.haskell.org" </> "00-index.tar")
 
 getPackageTarballPath
-    :: forall (m :: * -> *).
-       (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
     => PackageIdentifier -> m FilePath
 getPackageTarballPath pkg = do
     let pName = (show . disp . pkgName) pkg
@@ -165,8 +159,7 @@ getPackageTarballPath pkg = do
          (pName <> "-" <> pVersion <> ".tar.gz"))
 
 getCabalCacheDir
-    :: forall (m :: * -> *).
-       (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
     => m FilePath
 getCabalCacheDir = do
     c <- liftIO (getAppUserDataDirectory "cabal")

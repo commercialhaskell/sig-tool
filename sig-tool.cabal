@@ -21,16 +21,12 @@ source-repository head
 
 library
   hs-source-dirs:    src/
-  exposed-modules:   Sig.Cabal
+  exposed-modules:   Sig.Sign
+  other-modules:     Sig.Cabal
                      Sig.Cabal.Parse
-                     Sig.Defaults
-                     Sig.Doc
                      Sig.GPG
                      Sig.Hackage
-                     Sig.Sign
                      Sig.Types
-                     Sig.Update
-  other-modules:     System.Directory.Parse
   build-depends:     Cabal
                    , aeson
                    , ansi-wl-pprint
@@ -51,6 +47,7 @@ library
                    , old-locale
                    , process
                    , split
+                   , stack
                    , tar
                    , text
                    , time
