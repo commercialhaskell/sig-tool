@@ -1,4 +1,8 @@
 resolver: lts-5.3
 packages: ['.']
+extra-deps:
+- hpack-0.10.0
+- path-0.5.7
+- path-io-1.1.0
 ghc-options:
   "*": -Wall
