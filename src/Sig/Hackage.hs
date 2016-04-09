@@ -27,7 +27,7 @@ data UserDetail = UserDetail
 $(deriveFromJSON defaultOptions ''UserDetail)
 
 packagesForMaintainer
-    :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
+    :: (MonadBaseControl IO m, MonadIO m, MonadThrow m)
     => String -> m [PackageIdentifier]
 packagesForMaintainer uname = do
     req <- parseUrl ("https://hackage.haskell.org/user/" <> uname)

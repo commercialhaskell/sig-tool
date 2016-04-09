@@ -24,7 +24,6 @@ library
   exposed-modules:   Sig.Sign
   other-modules:     Sig.Cabal
                      Sig.Cabal.Parse
-                     Sig.GPG
                      Sig.Hackage
                      Sig.Types
   build-depends:     Cabal
@@ -40,11 +39,14 @@ library
                    , email-validate
                    , email-validate
                    , exceptions
+                   , exceptions
                    , filepath
                    , http-conduit
                    , http-types
                    , monad-control
+                   , monad-logger
                    , old-locale
+                   , path
                    , process
                    , split
                    , stack
@@ -61,6 +63,7 @@ executable sig
   build-depends:     base
                    , base-prelude
                    , cabal-file-th
+                   , monad-logger
                    , optparse-applicative
                    , sig-tool
                    , template-haskell
