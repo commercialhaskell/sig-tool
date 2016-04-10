@@ -12,28 +12,14 @@ Portability : POSIX
 
 module Sig.Sign (setup, sign) where
 
-import Control.Exception (throwIO)
-import Control.Monad (when)
-import Control.Monad.Catch
-import Control.Monad.Catch (MonadThrow)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Logger (MonadLogger(..))
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Logger (runStdoutLoggingT)
-import Control.Monad.Trans.Control (MonadBaseControl)
 import Data.Foldable (forM_)
-import Data.Monoid ((<>))
-import qualified Data.Text as T (unpack)
-import Data.Version (showVersion)
 import qualified Distribution.Package as Cabal
-import Network.HTTP.Conduit
-       (Response(responseStatus), RequestBody(RequestBodyBS),
-        Request(method, requestBody), withManager, httpLbs, parseUrl)
-import Network.HTTP.Types (status200, methodPut)
 import Path
 import Sig.Cabal
        (cabalFetch, packagesFromIndex, getPackageTarballPath)
 import Sig.Hackage (packagesForMaintainer)
-import qualified Stack.Sig.GPG as Stack
 import qualified Stack.Sig.Sign as Stack
 import Stack.Types
 
