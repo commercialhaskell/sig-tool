@@ -28,33 +28,25 @@ library
                      Sig.Types
   build-depends:     Cabal
                    , aeson
-                   , ansi-wl-pprint
                    , base
                    , bytestring
                    , conduit
                    , conduit-combinators
-                   , conduit-extra
                    , containers
                    , directory
-                   , email-validate
-                   , email-validate
-                   , exceptions
                    , exceptions
                    , filepath
                    , http-conduit
                    , http-types
                    , monad-control
                    , monad-logger
-                   , old-locale
                    , path
                    , process
                    , split
                    , stack
                    , tar
                    , text
-                   , time
                    , transformers
-                   , uuid
                    , yaml
 
 executable sig
