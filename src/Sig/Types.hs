@@ -23,6 +23,8 @@ data SigException
     | GPGSignException String
     | GPGVerifyException String
     | HackageAPIException String
+    | ManifestParseException
+    | DigestMismatchException
     | SigServiceException String
     deriving (Show)
 

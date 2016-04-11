@@ -53,7 +53,10 @@ import System.Directory (doesFileExist, getAppUserDataDirectory)
 import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
 import System.Process
-       (waitForProcess, spawnProcess, readProcessWithExitCode)
+       (callProcess, waitForProcess, spawnProcess, readProcessWithExitCode)
+
+cabalUpdate :: MonadIO m => m ()
+cabalUpdate = liftIO (callProcess "cabal" (["update"]))
 
 cabalInstallDryRun :: [String] -> String -> IO [PackageIdentifier]
 cabalInstallDryRun opts pkg = do

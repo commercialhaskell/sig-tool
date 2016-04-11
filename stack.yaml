@@ -1,5 +1,10 @@
 resolver: lts-5.3
-packages: ['.']
+packages:
+  - "."
+  - location:
+      git: https://github.com/commercialhaskell/stack.git
+      commit: master
+    extra-dep: true
 extra-deps:
 - hpack-0.10.0
 - path-0.5.7

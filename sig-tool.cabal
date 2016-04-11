@@ -33,6 +33,7 @@ library
                    , conduit
                    , conduit-combinators
                    , containers
+                   , cryptohash
                    , directory
                    , exceptions
                    , filepath
