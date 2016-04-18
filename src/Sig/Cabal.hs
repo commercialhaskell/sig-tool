@@ -50,8 +50,7 @@ import Sig.Types
 import System.Directory (doesFileExist, getAppUserDataDirectory)
 import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
-import System.Process
-       (callProcess, waitForProcess, spawnProcess, readProcessWithExitCode)
+import System.Process (callProcess, readProcessWithExitCode)
 
 cabalUpdate :: MonadIO m => m ()
 cabalUpdate = liftIO (callProcess "cabal" (["update"]))
@@ -62,14 +61,6 @@ cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) = 
     (code,_out,err) <-
         readProcessWithExitCode "cabal" (["fetch"] ++ opts ++ [pkg]) mempty
     unless (code == ExitSuccess) (throwIO (CabalFetchException err))
-
-cabalInstall :: [String] -> String -> IO ()
-cabalInstall opts pkg = do
-    code <-
-        waitForProcess =<< spawnProcess "cabal" (["install"] ++ opts ++ [pkg])
-    unless
-        (code == ExitSuccess)
-        (throwIO (CabalInstallException "unable to cabal-install"))
 
 cabalFilePackageId :: FilePath -> IO PackageIdentifier
 cabalFilePackageId fp =
