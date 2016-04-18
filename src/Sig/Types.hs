@@ -16,7 +16,6 @@ data SigException
     = CabalFetchException String
     | CabalIndexException String
     | CabalInstallException String
-    | CabalPackageListException String
     | GPGFingerprintException String
     | GPGKeyMissingException String
     | GPGNoSignatureException String

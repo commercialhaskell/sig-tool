@@ -47,8 +47,6 @@ import Distribution.PackageDescription.Parse
 import Distribution.Text (Text(disp), simpleParse)
 import Distribution.Verbosity (silent)
 import Sig.Types
-       (SigException(CabalFetchException, CabalInstallException,
-                     CabalIndexException, CabalPackageListException))
 import System.Directory (doesFileExist, getAppUserDataDirectory)
 import System.Exit (ExitCode(..))
 import System.FilePath ((</>))
@@ -57,39 +55,6 @@ import System.Process
 
 cabalUpdate :: MonadIO m => m ()
 cabalUpdate = liftIO (callProcess "cabal" (["update"]))
-
-cabalInstallDryRun :: [String] -> String -> IO [PackageIdentifier]
-cabalInstallDryRun opts pkg = do
-    (code,out,err) <-
-        readProcessWithExitCode
-            "cabal"
-            ([ "install"
-             , "--dry-run"
-             , "--package-db=clear"
-             , "--package-db=global"] ++
-             opts ++ [pkg])
-            mempty
-    if code /= ExitSuccess
-        then throwIO (CabalPackageListException err)
-        else return
-                 (if (last . lines $ out) ==
-                     "Use --reinstall if you want to reinstall anyway."
-                      then []
-                      else stdoutToPackageIdentifiers out)
-  where
-    stdoutToPackageIdentifiers :: String -> [PackageIdentifier]
-    stdoutToPackageIdentifiers =
-        map
-            (((\(version:reverseName) ->
-                    PackageIdentifier
-                        (PackageName (intercalate "-" (reverse reverseName)))
-                        Version
-                        { versionBranch = map read (splitOn "." version)
-                        , versionTags = []
-                        }) .
-              reverse . splitOn "-") .
-             head . splitOn " ") .
-        drop 2 . lines
 
 cabalFetch :: [String] -> PackageIdentifier -> IO ()
 cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) = do
