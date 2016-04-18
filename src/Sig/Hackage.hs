@@ -5,7 +5,7 @@
 module Sig.Hackage where
 
 import Control.Monad.Catch (MonadThrow, throwM)
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Data.Aeson (eitherDecode)
 import Data.Aeson.TH (deriveFromJSON, defaultOptions)
@@ -15,7 +15,8 @@ import Data.Monoid ((<>))
 import Distribution.Package (PackageIdentifier)
 import Distribution.Text (simpleParse)
 import Network.HTTP.Conduit
-       (parseUrl, withManager, httpLbs, requestHeaders, responseBody)
+       (parseUrl, newManager, httpLbs, requestHeaders, responseBody,
+        tlsManagerSettings)
 import Sig.Types (SigException(HackageAPIException))
 
 data UserDetail = UserDetail
@@ -30,13 +31,15 @@ packagesForMaintainer
     :: (MonadBaseControl IO m, MonadIO m, MonadThrow m)
     => String -> m [PackageIdentifier]
 packagesForMaintainer uname = do
+    mgr <- liftIO (newManager tlsManagerSettings)
     req <- parseUrl ("https://hackage.haskell.org/user/" <> uname)
     res <-
-        withManager
+        liftIO
             (httpLbs
                  (req
                   { requestHeaders = [("Accept", "application/json")]
-                  }))
+                  })
+                 mgr)
     case (fmap packageNamesForUser <$> eitherDecode) (responseBody res) of
         Left err ->
             throwM
