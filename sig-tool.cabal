@@ -23,7 +23,6 @@ library
   hs-source-dirs:    src/
   exposed-modules:   Sig.Sign
   other-modules:     Sig.Cabal
-                     Sig.Cabal.Parse
                      Sig.Hackage
                      Sig.Types
   build-depends:     Cabal
