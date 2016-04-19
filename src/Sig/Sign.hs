@@ -35,7 +35,7 @@ import Text.Printf (printf)
 setup :: String -> IO ()
 setup uname =
     runStdoutLoggingT
-        (do (packagesPath, manifestPath) <- getPaths
+        (do (packagesPath,manifestPath) <- getPaths
             liftIO (unsetEnv "GHC_PACKAGE_PATH")
             liftIO cabalUpdate
             fromHackage <- packagesForMaintainer uname
@@ -65,9 +65,7 @@ setup uname =
                                   ( toFilePath (filename destPackagePath)
                                   , cabalPackageHash)))
             liftIO
-                (Y.encodeFile
-                     (toFilePath manifestPath)
-                     (M.fromList packages)))
+                (Y.encodeFile (toFilePath manifestPath) (M.fromList packages)))
 
 sign :: String -> IO ()
 sign url =
