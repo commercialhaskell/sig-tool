@@ -39,13 +39,7 @@ import Data.Version (Version(..))
 import Distribution.Package
        (PackageName(PackageName), PackageIdentifier(PackageIdentifier),
         pkgName, pkgVersion)
-import Distribution.PackageDescription
-       (PackageDescription(package),
-        GenericPackageDescription(packageDescription))
-import Distribution.PackageDescription.Parse
-       (readPackageDescription)
 import Distribution.Text (Text(disp), simpleParse)
-import Distribution.Verbosity (silent)
 import Sig.Types
 import System.Directory (doesFileExist, getAppUserDataDirectory)
 import System.Exit (ExitCode(..))
@@ -61,10 +55,6 @@ cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) = 
     (code,_out,err) <-
         readProcessWithExitCode "cabal" (["fetch"] ++ opts ++ [pkg]) mempty
     unless (code == ExitSuccess) (throwIO (CabalFetchException err))
-
-cabalFilePackageId :: FilePath -> IO PackageIdentifier
-cabalFilePackageId fp =
-    pure . package . packageDescription =<< readPackageDescription silent fp
 
 packagesFromIndex
     :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
