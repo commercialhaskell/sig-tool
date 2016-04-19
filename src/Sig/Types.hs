@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 {-|
 Module      : Sig.Types
 Description : Bulk Haskell Package Signing Tool: Types
@@ -8,23 +10,38 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Types (SigException(..)) where
+module Sig.Types (SigToolException(..), showException) where
 
+#if __GLASGOW_HASKELL__ < 710
 import Control.Exception (Exception)
+#else
+import Control.Exception (Exception, displayException)
+#endif
 
-data SigException
+data SigToolException
     = CabalFetchException String
     | CabalIndexException String
-    | CabalInstallException String
-    | GPGFingerprintException String
-    | GPGKeyMissingException String
-    | GPGNoSignatureException String
-    | GPGSignException String
-    | GPGVerifyException String
     | HackageAPIException String
     | ManifestParseException
     | DigestMismatchException
-    | SigServiceException String
-    deriving (Show)
+    deriving Show
 
-instance Exception SigException
+showException :: SigToolException -> String
+#if __GLASGOW_HASKELL__ < 710
+showException = show
+#else
+showException = displayException
+#endif
+
+#if __GLASGOW_HASKELL__ < 710
+instance Exception SigToolException where
+#else
+instance Exception SigToolException where
+    displayException (CabalFetchException e) = e
+    displayException (CabalIndexException e) = e
+    displayException (HackageAPIException e) = e
+    displayException ManifestParseException =
+        "The manifest file could not be parsed"
+    displayException DigestMismatchException =
+        "Computed SHA digest for a package was wrong"
+#endif

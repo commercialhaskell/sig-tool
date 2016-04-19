@@ -22,9 +22,9 @@ source-repository head
 library
   hs-source-dirs:    src/
   exposed-modules:   Sig.Sign
+                     Sig.Types
   other-modules:     Sig.Cabal
                      Sig.Hackage
-                     Sig.Types
   build-depends:     Cabal
                    , aeson
                    , base

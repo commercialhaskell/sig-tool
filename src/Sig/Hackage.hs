@@ -17,7 +17,7 @@ import Distribution.Text (simpleParse)
 import Network.HTTP.Conduit
        (parseUrl, newManager, httpLbs, requestHeaders, responseBody,
         tlsManagerSettings)
-import Sig.Types (SigException(HackageAPIException))
+import Sig.Types
 
 data UserDetail = UserDetail
     { groups :: [String]
