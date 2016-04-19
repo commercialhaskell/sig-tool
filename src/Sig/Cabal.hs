@@ -11,7 +11,10 @@ Maintainer  : Tim Dysinger <tim@fpcomplete.com>
 Stability   : experimental
 Portability : POSIX
 -}
-module Sig.Cabal where
+module Sig.Cabal
+       (cabalFetch, cabalUpdate, getCabalCacheDir, getPackageIndexPath,
+        getPackageTarballPath, packagesFromIndex)
+       where
 
 #if __GLASGOW_HASKELL__ < 710
 import Prelude
