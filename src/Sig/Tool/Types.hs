@@ -27,21 +27,15 @@ data SigToolException
     deriving Show
 
 showException :: SigToolException -> String
-#if __GLASGOW_HASKELL__ < 710
-showException = show
-#else
-showException = displayException
-#endif
+showException (CabalFetchException e) = e
+showException (CabalIndexException e) = e
+showException (HackageAPIException e) = e
+showException ManifestParseException = "The manifest file could not be parsed"
+showException DigestMismatchException = "Computed SHA digest for a package was wrong"
 
 #if __GLASGOW_HASKELL__ < 710
-instance Exception SigToolException where
+instance Exception SigToolException
 #else
 instance Exception SigToolException where
-    displayException (CabalFetchException e) = e
-    displayException (CabalIndexException e) = e
-    displayException (HackageAPIException e) = e
-    displayException ManifestParseException =
-        "The manifest file could not be parsed"
-    displayException DigestMismatchException =
-        "Computed SHA digest for a package was wrong"
+    displayException = showException
 #endif
