@@ -11,7 +11,7 @@ Maintainer  : Tim Dysinger <tim@fpcomplete.com>
 Stability   : experimental
 Portability : POSIX
 -}
-module Sig.Cabal
+module Sig.Tool.Cabal
        (cabalFetch, cabalUpdate, getCabalCacheDir, getPackageIndexPath,
         getPackageTarballPath, packagesFromIndex)
        where
@@ -42,7 +42,7 @@ import Distribution.Package
        (PackageName(PackageName), PackageIdentifier(PackageIdentifier),
         pkgName, pkgVersion)
 import Distribution.Text (Text(disp), simpleParse)
-import Sig.Types
+import Sig.Tool.Types
 import System.Directory (doesFileExist, getAppUserDataDirectory)
 import System.Exit (ExitCode(..))
 import System.FilePath ((</>))

@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Sig.Hackage where
+module Sig.Tool.Hackage where
 
 import Control.Monad.Catch (MonadThrow, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -17,7 +17,7 @@ import Distribution.Text (simpleParse)
 import Network.HTTP.Conduit
        (parseUrl, newManager, httpLbs, requestHeaders, responseBody,
         tlsManagerSettings)
-import Sig.Types
+import Sig.Tool.Types
 
 data UserDetail = UserDetail
     { groups :: [String]

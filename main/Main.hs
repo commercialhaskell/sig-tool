@@ -27,8 +27,8 @@ import Options.Applicative
        (helper, execParser, subparser, str, progDesc, metavar, info,
         header, fullDesc, command, argument, strOption, long, short,
         showDefault, value)
-import Sig.Sign
-import Sig.Types
+import Sig.Tool
+import Sig.Tool.Types
 
 -- | Main entry point.
 main :: IO ()

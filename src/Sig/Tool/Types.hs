@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP #-}
 
 {-|
-Module      : Sig.Types
+Module      : Sig.Tool.Types
 Description : Bulk Haskell Package Signing Tool: Types
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
@@ -10,7 +10,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Types (SigToolException(..), showException) where
+module Sig.Tool.Types (SigToolException(..), showException) where
 
 #if __GLASGOW_HASKELL__ < 710
 import Control.Exception (Exception)

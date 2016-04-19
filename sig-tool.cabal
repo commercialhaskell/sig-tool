@@ -21,10 +21,10 @@ source-repository head
 
 library
   hs-source-dirs:    src/
-  exposed-modules:   Sig.Sign
-                     Sig.Types
-  other-modules:     Sig.Cabal
-                     Sig.Hackage
+  exposed-modules:   Sig.Tool
+                     Sig.Tool.Types
+  other-modules:     Sig.Tool.Cabal
+                     Sig.Tool.Hackage
   build-depends:     Cabal
                    , aeson
                    , base

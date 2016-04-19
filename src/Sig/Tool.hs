@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 {-|
-Module      : Sig.Sign
-Description : Bulk Haskell Package Signing Tool: Sign
+Module      : Sig.Tool
+Description : Bulk Haskell Package Signing Tool
 Copyright   : (c) FPComplete.com, 2015
 License     : BSD3
 Maintainer  : Tim Dysinger <tim@fpcomplete.com>
@@ -10,7 +10,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Sig.Sign (setup, sign) where
+module Sig.Tool (setup, sign) where
 
 import Control.Monad.Catch (MonadThrow, throwM)
 import Control.Monad.IO.Class (liftIO, MonadIO)
@@ -23,9 +23,9 @@ import Data.Traversable (forM)
 import qualified Data.Yaml as Y
 import qualified Distribution.Package as Cabal
 import Path
-import Sig.Cabal
-import Sig.Types
-import Sig.Hackage
+import Sig.Tool.Cabal
+import Sig.Tool.Types
+import Sig.Tool.Hackage
 import qualified Stack.Sig.Sign as Stack
 import System.Directory
        (copyFile, createDirectoryIfMissing, getCurrentDirectory)
