@@ -29,7 +29,6 @@ import Conduit
        (MonadIO(..), MonadThrow(..), MonadBaseControl, (=$), ($$),
         runResourceT, sourceFile, sinkList, linesUnboundedC, decodeUtf8C,
         concatMapC)
-import Control.Exception (throwIO)
 import Control.Monad (unless)
 import qualified Data.ByteString.Lazy as BL (readFile)
 import Data.List (intercalate, isSuffixOf, stripPrefix)
@@ -50,14 +49,20 @@ import System.FilePath ((</>))
 import System.Process (callProcess, readProcessWithExitCode)
 
 cabalUpdate :: MonadIO m => m ()
-cabalUpdate = liftIO (callProcess "cabal" (["update"]))
+cabalUpdate = liftIO (callProcess "cabal" ["update"])
 
-cabalFetch :: [String] -> PackageIdentifier -> IO ()
+cabalFetch
+    :: (MonadIO m, MonadThrow m)
+    => [String] -> PackageIdentifier -> m ()
 cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) = do
     let pkg = name <> "==" <> intercalate "." (map show branch)
     (code,_out,err) <-
-        readProcessWithExitCode "cabal" (["fetch"] ++ opts ++ [pkg]) mempty
-    unless (code == ExitSuccess) (throwIO (CabalFetchException err))
+        liftIO
+            (readProcessWithExitCode
+                 "cabal"
+                 (["fetch"] ++ opts ++ [pkg])
+                 mempty)
+    unless (code == ExitSuccess) (throwM (CabalFetchException err))
 
 packagesFromIndex
     :: (MonadIO m, MonadThrow m, MonadBaseControl IO m)
