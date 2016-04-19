@@ -45,8 +45,8 @@ setup uname =
                 forM
                     (filter
                          (\x ->
-                               (Cabal.pkgName x) `elem`
-                               (map Cabal.pkgName fromHackage))
+                               Cabal.pkgName x `elem`
+                               map Cabal.pkgName fromHackage)
                          fromIndex)
                     (\pkg ->
                           (do liftIO (cabalFetch ["--no-dependencies"] pkg)
