@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TupleSections #-}
 
 {-|
 Module      : Main
@@ -15,8 +16,10 @@ Portability : POSIX
 import Control.Applicative ((<$>))
 #endif
 
-import Control.Monad (join)
+
 import Control.Exception (catch)
+import Control.Monad.Logger (runLoggingT)
+import qualified Data.ByteString.Char8 as BC
 import Data.Monoid ((<>))
 import Data.Time (getCurrentTime)
 import Distribution.PackageDescription.TH
@@ -29,39 +32,47 @@ import Options.Applicative
         showDefault, value)
 import Sig.Tool
 import Sig.Tool.Types
+import System.Exit (exitFailure)
+import System.IO (hPutStrLn, stderr, stdout)
+import System.Log.FastLogger (fromLogStr)
 
 -- | Main entry point.
 main :: IO ()
-main =
+main = do
     let packageVersion = $(packageVariable (pkgVersion . package))
         buildDate = $(stringE =<< runIO (show `fmap` Data.Time.getCurrentTime))
         setupCmd =
             command
                 "setup"
                 (info
-                     (helper <*> (setup <$> argument str (metavar "USER")))
+                     (helper <*> ((setup, ) <$> argument str (metavar "USER")))
                      (fullDesc <>
                       progDesc
-                          "Download your packages & create a manifest.yaml"))
+                          "Download packages/ & create packages/manifest.yaml"))
         signCmd =
             command
                 "sign"
                 (info
                      (helper <*>
-                      (sign <$>
+                      ((sign, ) <$>
                        strOption
                            (long "url" <> short 'u' <> metavar "URL" <>
                             showDefault <>
                             value "https://sig.commercialhaskell.org")))
-                     (fullDesc <> progDesc "Sign all your packages"))
-    in catch
-           (join
-                (execParser
-                     (info
-                          (helper <*> subparser (setupCmd <> signCmd))
-                          (fullDesc <>
-                           header
-                               ("sig " <> packageVersion <> " " <> buildDate) <>
-                           progDesc "Haskell Package Bulk Signing Tool"))))
-           (\e ->
-                 putStrLn (showException (e :: SigToolException)))
+                     (fullDesc <>
+                      progDesc
+                          "Sign packages/ listed in packages/manifest.yaml"))
+        simpleLogger _loc _src _level msg =
+            BC.hPutStrLn stdout (fromLogStr msg)
+    (f,a) <-
+        execParser
+            (info
+                 (helper <*> subparser (setupCmd <> signCmd))
+                 (fullDesc <>
+                  header ("sig " <> packageVersion <> " " <> buildDate) <>
+                  progDesc "Haskell Package Bulk Signing Tool"))
+    catch
+        (runLoggingT (f a) simpleLogger)
+        (\e ->
+              do hPutStrLn stderr (showException (e :: SigToolException))
+                 exitFailure)

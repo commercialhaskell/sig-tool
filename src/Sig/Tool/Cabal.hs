@@ -31,7 +31,7 @@ import Conduit
         concatMapC)
 import Control.Monad (unless)
 import qualified Data.ByteString.Lazy as BL (readFile)
-import Data.List (intercalate, isSuffixOf, stripPrefix)
+import Data.List (intercalate, isSuffixOf, stripPrefix, sort)
 import Data.List.Split (splitOn)
 import Data.Maybe (catMaybes)
 import Data.Monoid ((<>))
@@ -83,7 +83,7 @@ packagesFromIndex = do
         throwM
             (CabalIndexException
                  ("Unable to read the Cabal package index: " <> show err))
-    filePathsFromTarball pkgs Tar.Done = (return . catMaybes) pkgs
+    filePathsFromTarball pkgs Tar.Done = (return . sort . catMaybes) pkgs
     filePathsFromTarball pkgs (Tar.Next entry es) =
         case Tar.entryContent entry of
             Tar.NormalFile _ _

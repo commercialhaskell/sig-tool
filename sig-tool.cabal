@@ -54,7 +54,9 @@ executable sig
   main-is:           Main.hs
   build-depends:     base
                    , base-prelude
+                   , bytestring
                    , cabal-file-th
+                   , fast-logger
                    , monad-logger
                    , optparse-applicative
                    , sig-tool
