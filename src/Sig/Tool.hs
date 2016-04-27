@@ -27,6 +27,8 @@ import qualified Data.Text as T
 import Data.Traversable (forM)
 import qualified Data.Yaml as Y
 import qualified Distribution.Package as Cabal
+import Network.HTTP.Client (newManager)
+import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Path
 import Sig.Tool.Cabal
 import Sig.Tool.Hackage
@@ -82,7 +84,8 @@ sign url = do
     mPackagesMap <- liftIO (Y.decodeFile (toFilePath manifestPath))
     case mPackagesMap :: Maybe (M.Map FilePath String) of
         Nothing -> throwM ManifestParseException
-        Just packageMap ->
+        Just packageMap -> do
+            manager <- liftIO (newManager tlsManagerSettings)
             mapM_
                 (\(path,hash) ->
                       do cabalPackagePath <-
@@ -90,7 +93,7 @@ sign url = do
                          cabalPackageHash <- digest cabalPackagePath
                          if cabalPackageHash /= hash
                              then throwM DigestMismatchException
-                             else Stack.sign url cabalPackagePath)
+                             else Stack.sign manager url cabalPackagePath)
                 (M.toList packageMap)
 
 getPaths :: (MonadIO m, MonadThrow m) => m (Path Abs Dir, Path Abs File)
