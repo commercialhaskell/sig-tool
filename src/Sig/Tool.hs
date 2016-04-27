@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -13,6 +14,10 @@ Portability : POSIX
 -}
 
 module Sig.Tool (setup, sign) where
+
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative (Applicative)
+#endif
 
 import Control.Monad.Catch (MonadMask, MonadThrow, throwM)
 import Control.Monad.IO.Class (liftIO, MonadIO)
@@ -77,7 +82,11 @@ setup uname = do
     liftIO (Y.encodeFile (toFilePath manifestPath) (M.fromList packages))
 
 sign
+#if __GLASGOW_HASKELL__ < 710
+    :: (Applicative m, MonadIO m, MonadLogger m, MonadMask m, MonadThrow m)
+#else
     :: (MonadIO m, MonadLogger m, MonadMask m, MonadThrow m)
+#endif
     => String -> m ()
 sign url = do
     (packagesPath,manifestPath) <- getPaths
@@ -104,7 +113,11 @@ getPaths = do
     return (packagesPath, manifestPath)
 
 digest
+#if __GLASGOW_HASKELL__ < 710
+    :: (Functor m, MonadIO m)
+#else
     :: MonadIO m
+#endif
     => Path Abs File -> m String
 digest path = fmap (toHex . hashlazy) (liftIO (LBS.readFile (toFilePath path)))
   where

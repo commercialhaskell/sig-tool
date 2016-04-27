@@ -1,4 +1,7 @@
 resolver: lts-5.14
+# docker:
+#   enable: true
+#   repo: fpco/stack-full
 packages:
   - "."
   - location:

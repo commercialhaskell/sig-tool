@@ -1,5 +1,9 @@
 {-# LANGUAGE CPP #-}
 
+#if __GLASGOW_HASKELL__ < 710
+{-# LANGUAGE DeriveDataTypeable #-}
+#endif
+
 {-|
 Module      : Sig.Tool.Types
 Description : Bulk Haskell Package Signing Tool: Types
@@ -12,10 +16,12 @@ Portability : POSIX
 
 module Sig.Tool.Types (SigToolException(..), showException) where
 
-#if __GLASGOW_HASKELL__ < 710
 import Control.Exception (Exception)
+
+#if __GLASGOW_HASKELL__ < 710
+import Data.Data (Typeable)
 #else
-import Control.Exception (Exception, displayException)
+import Control.Exception (displayException)
 #endif
 
 data SigToolException
@@ -24,7 +30,11 @@ data SigToolException
     | HackageAPIException String
     | ManifestParseException
     | DigestMismatchException
-    deriving Show
+#if __GLASGOW_HASKELL__ < 710
+    deriving (Show, Typeable)
+#else
+    deriving (Show)
+#endif
 
 showException :: SigToolException -> String
 showException (CabalFetchException e) = e

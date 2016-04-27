@@ -61,7 +61,7 @@ cabalFetch opts (PackageIdentifier (PackageName name) (Version branch _tags)) = 
             (readProcessWithExitCode
                  "cabal"
                  (["fetch"] ++ opts ++ [pkg])
-                 mempty)
+                 [])
     unless (code == ExitSuccess) (throwM (CabalFetchException err))
 
 packagesFromIndex

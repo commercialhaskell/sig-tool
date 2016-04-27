@@ -1,8 +1,13 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Sig.Tool.Hackage where
+
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative ((<$>))
+#endif
 
 import Control.Monad.Catch (MonadThrow, throwM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
