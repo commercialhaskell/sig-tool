@@ -1,9 +1,9 @@
-resolver: nightly-2016-04-20
+resolver: lts-5.14
 packages:
   - "."
   - location:
       git: https://github.com/commercialhaskell/stack.git
-      commit: e0713a557ae5231557504d82462e1c507847fc45
+      commit: master
     extra-dep: true
 extra-deps:
 - hpack-0.10.0
