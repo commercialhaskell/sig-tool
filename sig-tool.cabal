@@ -36,6 +36,8 @@ library
                    , directory
                    , exceptions
                    , filepath
+                   , http-client
+                   , http-client-tls
                    , http-conduit
                    , http-types
                    , monad-control
